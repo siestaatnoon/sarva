@@ -3,13 +3,13 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.oscarrrweb.tddboilerplate"
+        applicationId "com.oscarrrweb.sarva"
         minSdkVersion 24
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
-        testApplicationId "com.oscarrrweb.tddboilerplate.test"
+        testApplicationId "com.oscarrrweb.sarva.test"
         testInstrumentationRunner getInstrumentation()
 
         // Uncomment this to clear app data before each test when running with orchestrator
@@ -84,7 +84,7 @@ def timberVersion = "4.5.1"
 def getInstrumentation() {
     project.hasProperty('junit') ?
             'androidx.test.runner.AndroidJUnitRunner' :
-            'com.oscarrrweb.tddboilerplate.test.CucumberTestRunner'
+            'com.oscarrrweb.sarva.test.CucumberTestRunner'
             //'cucumber.api.android.CucumberAndroidJUnitRunner'
 }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.oscarrrweb.tddboilerplate">
+    package="com.oscarrrweb.sarva">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
-        android:name=".App"
+        android:name="com.oscarrrweb.sarva.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -17,8 +17,8 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".sample.SeederActivity"
-            android:parentActivityName=".sample.SeederActivity">
+            android:name="com.oscarrrweb.sarva.sample.SeederActivity"
+            android:parentActivityName="com.oscarrrweb.sarva.sample.SeederActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".presentation.ui.activities.MainActivity">
+        <activity android:name="com.oscarrrweb.sarva.presentation.ui.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -37,21 +37,21 @@
         </activity>
 
         <activity
-            android:name=".presentation.ui.activities.SettingsActivity"
+            android:name="com.oscarrrweb.sarva.presentation.ui.activities.SettingsActivity"
             android:label="@string/title_settings"
-            android:parentActivityName=".presentation.ui.activities.MainActivity">
+            android:parentActivityName="com.oscarrrweb.sarva.presentation.ui.activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".presentation.ui.activities.MainActivity" />
+                android:value="com.oscarrrweb.sarva.presentation.ui.activities.MainActivity" />
         </activity>
 
         <activity
-            android:name=".presentation.ui.activities.AboutActivity"
+            android:name="com.oscarrrweb.sarva.presentation.ui.activities.AboutActivity"
             android:label="@string/title_about"
-            android:parentActivityName=".presentation.ui.activities.MainActivity">
+            android:parentActivityName="com.oscarrrweb.sarva.presentation.ui.activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".presentation.ui.activities.MainActivity" />
+                android:value="com.oscarrrweb.sarva.presentation.ui.activities.MainActivity" />
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />
                 <category android:name="android.intent.category.DEFAULT" />

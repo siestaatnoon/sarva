@@ -2,12 +2,12 @@
 <preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
 
     <header
-        android:fragment="com.oscarrrweb.tddboilerplate.presentation.ui.fragments.GeneralPreferencesFragment"
+        android:fragment="com.oscarrrweb.sarva.presentation.ui.fragments.GeneralPreferencesFragment"
         android:icon="@drawable/ic_info_outline_black_24dp"
         android:title="@string/pref_title_general" />
 
     <header
-        android:fragment="com.oscarrrweb.tddboilerplate.presentation.ui.fragments.DataPreferencesFragment"
+        android:fragment="com.oscarrrweb.sarva.presentation.ui.fragments.DataPreferencesFragment"
         android:icon="@drawable/ic_sync_black_24dp"
         android:title="@string/pref_title_data_sync" />
 

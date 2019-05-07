@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TDD Boilerplate</string>
+    <string name="app_name">SARVA</string>
     <string name="app_package">com.oscarrrweb.tddboilerplate</string>
     <string name="app_authority">@string/app_package</string>
     <string name="app_account_type">@string/app_package</string>
