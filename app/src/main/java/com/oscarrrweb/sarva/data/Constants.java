@@ -46,4 +46,8 @@ final public class Constants {
      */
     public static final String HEADER_TOKEN_HASH    = "X-Token-Hash";
 
+    /**
+     * Default volume setting for search tone.
+     */
+    public static final int SEARCH_TONE_VOLUME      = 10;
 }

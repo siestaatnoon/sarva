@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.oscarrrweb.sarva"
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -73,6 +73,7 @@ def gsonVersion = "2.8.5"
 def junitVersion = "4.12"
 def leakcanaryVersion = "1.6.3"
 def mockitoVersion = "2.8.9"
+def nearbyVersion = "16.0.0"
 def okHttpVersion = "3.12.1"
 def retrofitVersion = "2.5.0"
 def robolectricVersion = "4.1"
@@ -85,7 +86,6 @@ def getInstrumentation() {
     project.hasProperty('junit') ?
             'androidx.test.runner.AndroidJUnitRunner' :
             'com.oscarrrweb.sarva.test.CucumberTestRunner'
-            //'cucumber.api.android.CucumberAndroidJUnitRunner'
 }
 
 def getTestTags() {
@@ -130,6 +130,9 @@ dependencies {
     // Room database
     implementation "androidx.room:room-runtime:${roomVersion}"
     annotationProcessor "androidx.room:room-compiler:${roomVersion}"
+
+    // Nearby
+    implementation "com.google.android.gms:play-services-nearby:${nearbyVersion}"
 
     // Uncomment to use Butterknife
     // NOTE: Requires API 26 or higher, look for TODO: Convert to Butterknife

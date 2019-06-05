@@ -15,8 +15,6 @@ import android.view.MenuItem;
 
 import com.oscarrrweb.sarva.R;
 import com.oscarrrweb.sarva.presentation.ui.activities.base.AppCompatPreferenceActivity;
-import com.oscarrrweb.sarva.presentation.ui.fragments.DataPreferencesFragment;
-import com.oscarrrweb.sarva.presentation.ui.fragments.GeneralPreferencesFragment;
 
 import java.util.List;
 
@@ -125,7 +123,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<PreferenceActivity.Header> target) {
-        loadHeadersFromResource(R.xml.prefs_headers, target);
+        //loadHeadersFromResource(R.xml.prefs_headers, target);
     }
 
     /**
@@ -133,8 +131,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * Make sure to deny any unknown fragments here.
      */
     protected boolean isValidFragment(String fragmentName) {
-        return PreferenceFragment.class.getName().equals(fragmentName)
-                || GeneralPreferencesFragment.class.getName().equals(fragmentName)
-                || DataPreferencesFragment.class.getName().equals(fragmentName);
+        return true;
     }
 }

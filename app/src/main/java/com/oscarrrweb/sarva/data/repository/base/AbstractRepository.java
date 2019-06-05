@@ -76,7 +76,7 @@ abstract public class AbstractRepository<E extends Entity, T extends Model,
         }
 
         try {
-            return(int) mDao.insert(entity);
+            return (int) mDao.insert(entity);
         } catch (SQLiteException e) {
             // This is most likely due to entity having a foreign
             // key to a row that no longer exists
@@ -313,5 +313,23 @@ abstract public class AbstractRepository<E extends Entity, T extends Model,
         } catch (SQLiteException e) {
             throw new RepositoryQueryException(e);
         }
+    }
+
+    /**
+     * Returns the Room database DAO.
+     *
+     * @return The database DAO
+     */
+    protected D getDao() {
+        return mDao;
+    }
+
+    /**
+     * Returns the domain/entity mapper.
+     *
+     * @return The domain/entity mapper
+     */
+    protected M getMapper() {
+        return mMapper;
     }
 }

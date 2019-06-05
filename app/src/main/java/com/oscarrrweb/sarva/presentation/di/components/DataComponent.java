@@ -1,11 +1,14 @@
 package com.oscarrrweb.sarva.presentation.di.components;
 
+import com.oscarrrweb.sarva.data.mappers.partners.PartnerMapper;
 import com.oscarrrweb.sarva.data.mappers.sample.DoodadMapper;
 import com.oscarrrweb.sarva.data.mappers.sample.GizmoMapper;
 import com.oscarrrweb.sarva.data.mappers.sample.WidgetMapper;
+import com.oscarrrweb.sarva.data.repository.partners.PartnerRepository;
 import com.oscarrrweb.sarva.data.repository.sample.DoodadRepository;
 import com.oscarrrweb.sarva.data.repository.sample.GizmoRepository;
 import com.oscarrrweb.sarva.data.repository.sample.WidgetRepository;
+import com.oscarrrweb.sarva.data.storage.dao.partners.PartnerDao;
 import com.oscarrrweb.sarva.data.storage.dao.sample.DoodadDao;
 import com.oscarrrweb.sarva.data.storage.dao.sample.GizmoDao;
 import com.oscarrrweb.sarva.data.storage.dao.sample.WidgetDao;
@@ -21,6 +24,16 @@ import dagger.Component;
 public interface DataComponent {
 
     AppDatabase appDatabase();
+
+    void inject(PartnerMapper mapper);
+
+    void inject(PartnerRepository repository);
+
+    PartnerRepository partnerRepository();
+
+    PartnerMapper partnerMapper();
+
+    PartnerDao partnerDao();
 
     /* SAMPLE USAGE BELOW */
 

@@ -2,13 +2,16 @@ package com.oscarrrweb.sarva.presentation.di.modules;
 
 import android.content.Context;
 
+import com.oscarrrweb.sarva.data.mappers.partners.PartnerMapper;
 import com.oscarrrweb.sarva.data.mappers.sample.DoodadMapper;
 import com.oscarrrweb.sarva.data.mappers.sample.GizmoMapper;
 import com.oscarrrweb.sarva.data.mappers.sample.WidgetMapper;
 import com.oscarrrweb.sarva.data.network.retrofit.RestClient;
+import com.oscarrrweb.sarva.data.repository.partners.PartnerRepository;
 import com.oscarrrweb.sarva.data.repository.sample.DoodadRepository;
 import com.oscarrrweb.sarva.data.repository.sample.GizmoRepository;
 import com.oscarrrweb.sarva.data.repository.sample.WidgetRepository;
+import com.oscarrrweb.sarva.data.storage.dao.partners.PartnerDao;
 import com.oscarrrweb.sarva.data.storage.dao.sample.DoodadDao;
 import com.oscarrrweb.sarva.data.storage.dao.sample.GizmoDao;
 import com.oscarrrweb.sarva.data.storage.dao.sample.WidgetDao;
@@ -60,7 +63,21 @@ public class DataModule {
         return RestClient.getInstance(apiBaseUrl, refreshInstance);
     }
 
+    @Provides @Singleton PartnerRepository providePartnerRepository() {
+        return new PartnerRepository();
+    }
+
+    @Provides @Singleton PartnerMapper providePartnerMapper() {
+        return new PartnerMapper();
+    }
+
+    @Provides @Singleton PartnerDao providePartnerDao() {
+        return database.partnerDao();
+    }
+
+
     /* SAMPLE USAGE BELOW */
+
 
     @Provides @Singleton GizmoRepository provideGizmoRepository() {
         return new GizmoRepository();

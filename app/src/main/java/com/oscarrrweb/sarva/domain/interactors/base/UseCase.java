@@ -1,5 +1,7 @@
 package com.oscarrrweb.sarva.domain.interactors.base;
 
+import io.reactivex.Completable;
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 /**
@@ -26,7 +28,29 @@ public interface UseCase<P, R> {
     /**
      * While the <code>run(P)</code> method defines the UseCase processing, this method is called
      * from an instance of the implementing UseCase class for execution which calls the
-     * <code>run(P)</code> method.
+     * <code>run(P)</code> method. Used for executing tasks only expecting that it has been
+     * completed.
+     *
+     * @param parameter The generic type parameter passed to the UseCase to process
+     * @return          An RxJava Completable object
+     */
+    Completable complete(P parameter) throws Exception;
+
+    /**
+     * While the <code>run(P)</code> method defines the UseCase processing, this method is called
+     * from an instance of the implementing UseCase class for execution which calls the
+     * <code>run(P)</code> method. Used for asynchronous tasks expecting data transfer
+     * over a period of time.
+     *
+     * @param parameter The generic type parameter passed to the UseCase to process
+     * @return          An RxJava Flowable object
+     */
+    Flowable<R> emit(P parameter) throws Exception;
+
+    /**
+     * While the <code>run(P)</code> method defines the UseCase processing, this method is called
+     * from an instance of the implementing UseCase class for execution which calls the
+     * <code>run(P)</code> method. Used for one-time data transfer.
      *
      * @param parameter The generic type parameter passed to the UseCase to process
      * @return          An RxJava Single object

@@ -6,11 +6,13 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import android.content.Context;
 
+import com.oscarrrweb.sarva.data.entity.partners.PartnerEntity;
 import com.oscarrrweb.sarva.data.entity.sample.DoodadEntity;
 import com.oscarrrweb.sarva.data.entity.sample.GizmoEntity;
 import com.oscarrrweb.sarva.data.entity.sample.WidgetEntity;
 import com.oscarrrweb.sarva.data.storage.converters.ByteArrayConverter;
 import com.oscarrrweb.sarva.data.storage.converters.DateConverter;
+import com.oscarrrweb.sarva.data.storage.dao.partners.PartnerDao;
 import com.oscarrrweb.sarva.data.storage.dao.sample.GizmoDao;
 import com.oscarrrweb.sarva.data.storage.dao.sample.DoodadDao;
 import com.oscarrrweb.sarva.data.storage.dao.sample.WidgetDao;
@@ -25,6 +27,7 @@ import com.oscarrrweb.sarva.data.storage.utils.DatabaseUtils;
  */
 @Database(
         entities = {
+                PartnerEntity.class,
                 GizmoEntity.class,
                 WidgetEntity.class,
                 DoodadEntity.class
@@ -53,6 +56,13 @@ public abstract class AppDatabase extends RoomDatabase {
      * Singleton instance of the test database.
      */
     private static volatile AppDatabase sTestInstance = null;
+
+    /**
+     * Returns a DAO instance for {@link PartnerEntity} objects.
+     *
+     * @return The PartnerDao instance
+     */
+    abstract public PartnerDao partnerDao();
 
     // TEST USE BELOW
 

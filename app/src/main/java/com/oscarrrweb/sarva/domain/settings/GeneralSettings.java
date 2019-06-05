@@ -18,6 +18,27 @@ package com.oscarrrweb.sarva.domain.settings;
 public interface GeneralSettings {
 
     /**
+     * Returns the String key to access the UUID setting.
+     *
+     * @return The UUID
+     */
+    String getUuidKey();
+
+    /**
+     * Returns the value of the UUID setting.
+     *
+     * @return The UUID value
+     */
+    String getUuid();
+
+    /**
+     * Sets the UUID value.
+     *
+     * @param uuid The UUID
+     */
+    void setUuid(String uuid);
+
+    /**
      * Returns the String key to access the username setting.
      *
      * @return The username key
@@ -37,4 +58,25 @@ public interface GeneralSettings {
      * @param username The username
      */
     void setUsername(String username);
+
+    /**
+     * Returns the String key to access the search volume setting.
+     *
+     * @return The search volume key
+     */
+    String getVolumeKey();
+
+    /**
+     * Returns the value of the search volume setting.
+     *
+     * @return The search volume value
+     */
+    int getVolume();
+
+    /**
+     * Sets the search volume setting.
+     *
+     * @param volume The search volume
+     */
+    void setVolume(int volume);
 }

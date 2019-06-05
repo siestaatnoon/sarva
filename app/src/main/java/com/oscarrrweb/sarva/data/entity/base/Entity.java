@@ -1,8 +1,5 @@
 package com.oscarrrweb.sarva.data.entity.base;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
 import android.util.Base64;
 
 import com.google.gson.ExclusionStrategy;
@@ -24,6 +21,7 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import com.oscarrrweb.sarva.data.utils.DateUtils;
+import com.oscarrrweb.sarva.data.utils.UuidUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -31,8 +29,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 import timber.log.Timber;
 
 /**
@@ -116,9 +116,9 @@ abstract public class Entity implements Serializable {
      * Creates a deserializer for boolean values typically set as 0 or 1 within JSON and
      * converting those to primitive boolean type. When configured with a {@link Gson}
      * deserializer, will automatically convert JSON fields into their respective
-     *  fields of the Entity.
+     * fields of the Entity.
      */
-    private static class BooleanDeserializer implements JsonDeserializer<Boolean> {
+    public static class BooleanDeserializer implements JsonDeserializer<Boolean> {
 
         /**
          * Converts a JSON element boolean to a primitive boolean value in it's corresponding
@@ -152,7 +152,7 @@ abstract public class Entity implements Serializable {
      * deserializer, will automatically convert Entity fields into their respective
      * fields of the resulting JSON.
      */
-    private static class BooleanSerializer implements JsonSerializer<Boolean> {
+    public static class BooleanSerializer implements JsonSerializer<Boolean> {
 
         /**
          * Converts a Java Boolean type to 0 or 1 for use in database or JSON output.
@@ -179,7 +179,7 @@ abstract public class Entity implements Serializable {
      * NOTE: Android Base64 used for backward compatibility (API 23+)
      * java.util.Base64 is Java 8 an API 26+
      */
-    private static class ByteArrayDeserializer implements JsonDeserializer<byte[]> {
+    public static class ByteArrayDeserializer implements JsonDeserializer<byte[]> {
 
         /**
          * Converts a JSON element base64 string to a Java byte array in it's corresponding
@@ -212,7 +212,7 @@ abstract public class Entity implements Serializable {
      * NOTE: Android Base64 used for backward compatibility (API 23+)
      * java.util.Base64 is Java 8 an API 26+
      */
-    private static class ByteArraySerializer implements JsonSerializer<byte[]> {
+    public static class ByteArraySerializer implements JsonSerializer<byte[]> {
 
         /**
          * Converts a Java byte array to base64 encoded string for use in database or JSON output.
@@ -238,7 +238,7 @@ abstract public class Entity implements Serializable {
      * deserializer, will automatically convert JSON fields into their respective
      * fields of the Entity.
      */
-    private static class DateDeserializer implements JsonDeserializer<Date> {
+    public static class DateDeserializer implements JsonDeserializer<Date> {
 
         /**
          * Converts a JSON element SQL date string to a Java Date in it's corresponding
@@ -272,7 +272,7 @@ abstract public class Entity implements Serializable {
      * NOTE: Android Base64 used for backward compatibility (API 23+)
      * java.util.Base64 is Java 8 an API 26+
      */
-    private static class DateSerializer implements JsonSerializer<Date> {
+    public static class DateSerializer implements JsonSerializer<Date> {
 
         /**
          * Converts a Java Date to an SQL string in format yyyy-dd-mm for use in database or
@@ -337,7 +337,7 @@ abstract public class Entity implements Serializable {
      */
     public void setUuid() {
         if (uuid == null) {
-            uuid = UUID.randomUUID().toString();
+            uuid = UuidUtils.uuid();
         }
     }
 

@@ -8,7 +8,7 @@ import io.reactivex.plugins.RxJavaPlugins;
 
 @CucumberOptions(
         features = "features",
-        glue = "com.oscarrrweb.tddboilerplate",
+        glue = "com.oscarrrweb.sarva",
         tags = {"@e2e"}
 )
 public class CucumberTestRunner extends CucumberAndroidJUnitRunner {
