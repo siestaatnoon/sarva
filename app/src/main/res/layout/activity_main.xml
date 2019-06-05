@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.oscarrrweb.sarva.presentation.ui.activities.MainActivity">
+    tools:context="com.cccdlabs.sarva.presentation.ui.activities.MainActivity">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/gizmo_list"

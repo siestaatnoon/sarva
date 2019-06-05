@@ -9,7 +9,7 @@ android {
         versionCode 1
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
-        testApplicationId "com.oscarrrweb.sarva.test"
+        testApplicationId "com.cccdlabs.sarva.test"
         testInstrumentationRunner getInstrumentation()
 
         // Uncomment this to clear app data before each test when running with orchestrator
@@ -85,7 +85,7 @@ def timberVersion = "4.5.1"
 def getInstrumentation() {
     project.hasProperty('junit') ?
             'androidx.test.runner.AndroidJUnitRunner' :
-            'com.oscarrrweb.sarva.test.CucumberTestRunner'
+            'com.cccdlabs.sarva.test.CucumberTestRunner'
 }
 
 def getTestTags() {
