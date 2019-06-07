@@ -8,6 +8,9 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.cccdlabs.sarva.data.p2p.nearby.base.AbstractNearbyPartnerEmitter;
+import com.cccdlabs.sarva.domain.p2p.exception.PartnerException;
+import com.cccdlabs.sarva.domain.repository.exception.RepositoryException;
 import com.google.android.gms.common.api.Api;
 import com.google.android.gms.nearby.messages.BleSignal;
 import com.google.android.gms.nearby.messages.Distance;
@@ -24,11 +27,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.cccdlabs.sarva.data.p2p.nearby.base.AbstractNearbyPartnerEmitter;
-import com.cccdlabs.sarva.domain.p2p.exception.PartnerException;
-import com.cccdlabs.sarva.domain.repository.exception.RepositoryException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static org.mockito.Mockito.mock;
@@ -44,10 +47,12 @@ public class MockMessagesClient extends MessagesClient {
     private static final String CLASS_TAG = "[MockMessagesClient]";
 
     private ClientState mClientState;
+    private Map<Integer, StatusCallback> statusCallbacks;
     private Message mMessage;
     private MessageListener mMessageListener;
     private PublishOptions mPublishOptions;
     private SubscribeOptions mSubscribeOptions;
+    private MockTask mStatusTask;
     private MockTask mPublishTask;
     private MockTask mSubscribeTask;
     private Throwable mockException;
@@ -121,9 +126,9 @@ public class MockMessagesClient extends MessagesClient {
      */
     public static class MockTask extends Task<Void> {
 
-        private OnSuccessListener<? super Void> onSuccessListener;
-        private OnCompleteListener<Void> onCompleteListener;
-        private OnCanceledListener onCanceledListener;
+        private Map<Integer, OnSuccessListener<? super Void>> onSuccessListeners;
+        private Map<Integer, OnCompleteListener<Void>> onCompleteListeners;
+        private Map<Integer, OnCanceledListener> onCanceledListeners;
         private Exception thrownException;
         private boolean isComplete;
         private boolean isSuccessful;
@@ -131,6 +136,9 @@ public class MockMessagesClient extends MessagesClient {
 
         public MockTask() {
             super();
+            onSuccessListeners = new HashMap<>();
+            onCompleteListeners = new HashMap<>();
+            onCanceledListeners = new HashMap<>();
         }
 
         @Override
@@ -172,21 +180,24 @@ public class MockMessagesClient extends MessagesClient {
         @NonNull
         @Override
         public Task<Void> addOnSuccessListener(@NonNull OnSuccessListener<? super Void> onSuccessListener) {
-            this.onSuccessListener = onSuccessListener;
+            int hashCode = onSuccessListener.hashCode();
+            onSuccessListeners.put(hashCode, onSuccessListener);
             return this;
         }
 
         @NonNull
         @Override
         public Task<Void> addOnCompleteListener(@NonNull OnCompleteListener<Void> onCompleteListener) {
-            this.onCompleteListener = onCompleteListener;
+            int hashCode = onCompleteListeners.hashCode();
+            onCompleteListeners.put(hashCode, onCompleteListener);
             return this;
         }
 
         @NonNull
         @Override
         public Task<Void> addOnCanceledListener(@NonNull OnCanceledListener onCanceledListener) {
-            this.onCanceledListener = onCanceledListener;
+            int hashCode = onCanceledListeners.hashCode();
+            onCanceledListeners.put(hashCode, onCanceledListener);
             return this;
         }
 
@@ -207,39 +218,66 @@ public class MockMessagesClient extends MessagesClient {
          * Extra method to mock OnCompleteListener.
          */
         void setComplete(boolean complete) {
-            if (onCompleteListener != null) {
-                onCompleteListener.onComplete(this);
-            }
             isComplete = complete;
+            if ( ! isComplete) {
+                return;
+            }
+
+            Set<Integer> hashCodes = onCompleteListeners.keySet();
+            for (int hashCode : hashCodes) {
+                OnCompleteListener<Void> callback = onCompleteListeners.get(hashCode);
+                if (callback != null) {
+                    callback.onComplete(this);
+                }
+            }
         }
 
         /**
          * Extra method to mock OnSuccessListener.
          */
         void setSuccessful(boolean successful) {
-            if (onSuccessListener != null) {
-                onSuccessListener.onSuccess(null);
-            }
             isSuccessful = successful;
+            if ( ! isSuccessful) {
+                return;
+            }
+
+            Set<Integer> hashCodes = onSuccessListeners.keySet();
+            for (int hashCode : hashCodes) {
+                OnSuccessListener<? super Void> callback = onSuccessListeners.get(hashCode);
+                if (callback != null) {
+                    callback.onSuccess(null);
+                }
+            }
         }
 
         /**
          * Extra method to mock OnCanceledListener.
          */
         void setCanceled(boolean canceled) {
-            if (onCanceledListener != null) {
-                onCanceledListener.onCanceled();
-            }
             isCanceled = canceled;
+            if ( ! isCanceled) {
+                return;
+            }
+
+            Set<Integer> hashCodes = onCanceledListeners.keySet();
+            for (int hashCode : hashCodes) {
+                OnCanceledListener callback = onCanceledListeners.get(hashCode);
+                if (callback != null) {
+                    callback.onCanceled();
+                }
+            }
         }
 
         /**
          * Easy GC.
          */
         void clear() {
-            onSuccessListener = null;
-            onCompleteListener = null;
-            onCanceledListener = null;
+            onSuccessListeners.clear();
+            onCompleteListeners.clear();
+            onCanceledListeners.clear();
+            onSuccessListeners = null;
+            onCompleteListeners = null;
+            onCanceledListeners = null;
             thrownException = null;
         }
 
@@ -271,7 +309,7 @@ public class MockMessagesClient extends MessagesClient {
 
     /**
      * MockMessagesClient may be initialized with an Activity or Context (or instrumentation Context).
-     * Note that this will not reproduce any any automated Nearby notifications in the UI
+     * Note that this will not reproduce any any Nearby notifications in the UI
      * as the real class does.
      */
     public MockMessagesClient(@NonNull Activity activity) {
@@ -287,6 +325,7 @@ public class MockMessagesClient extends MessagesClient {
         super(activity, mock(Api.class), null, Settings.DEFAULT_SETTINGS);
         this.debug = debug;
         mClientState = new ClientState();
+        statusCallbacks  = new HashMap<>();
         isClosed = false;
     }
 
@@ -295,11 +334,12 @@ public class MockMessagesClient extends MessagesClient {
         super(context, mock(Api.class), null, Settings.DEFAULT_SETTINGS);
         this.debug = debug;
         mClientState = new ClientState();
+        statusCallbacks  = new HashMap<>();
         isClosed = false;
     }
 
     /**
-     * NOTE: returns null Task<Void> if called more than once.
+     * NOTE: returns null Task<Void> if called after already published.
      */
     @Override
     public Task<Void> publish(@NonNull Message message) {
@@ -307,7 +347,7 @@ public class MockMessagesClient extends MessagesClient {
     }
 
     /**
-     * NOTE: returns null Task<Void> if called more than once.
+     * NOTE: returns null Task<Void> if called after already published.
      */
     @Override
     public Task<Void> publish(@NonNull Message message, @Nullable PublishOptions publishOptions) {
@@ -332,7 +372,7 @@ public class MockMessagesClient extends MessagesClient {
     }
 
     /**
-     * NOTE: returns null Task<Void> if called more than once.
+     * NOTE: returns null Task<Void> if called after already subscribed.
      */
     @Override
     public Task<Void> subscribe(@NonNull MessageListener messageListener) {
@@ -340,7 +380,7 @@ public class MockMessagesClient extends MessagesClient {
     }
 
     /**
-     * NOTE: returns null Task<Void> if called more than once.
+     * NOTE: returns null Task<Void> if called after already subscribed.
      */
     @Override
     public Task<Void> subscribe(@NonNull MessageListener messageListener, @Nullable SubscribeOptions subscribeOptions) {
@@ -362,28 +402,69 @@ public class MockMessagesClient extends MessagesClient {
         return mSubscribeTask;
     }
 
+    /**
+     * NOTE: returns null Task<Void> if called after already unpublished.
+     */
     @Override
     public Task<Void> unpublish(@NonNull Message message) {
         checkState();
-        if (debug) {
-            System.out.println(CLASS_TAG + " unpublish(Message)");
+        String msg = CLASS_TAG + " unpublish(Message)";
+        if ( ! isPublishing) {
+            if (debug) {
+                System.out.println(msg + " ignored, already unpublished");
+            }
+            return null;
+        } else if (debug) {
+            System.out.println(msg);
         }
         mMessage = null;
         mPublishOptions = null;
-        setPublishing(false, true, true, true);
+        setPublishing(false, false, true, true);
         return mPublishTask;
     }
 
+    /**
+     * NOTE: returns null Task<Void> if called after already unsubscribed.
+     */
     @Override
     public Task<Void> unsubscribe(@NonNull MessageListener messageListener) {
         checkState();
-        if (debug) {
-            System.out.println(CLASS_TAG + " unsubscribe(MessageListener)");
+        String msg = CLASS_TAG + " unsubscribe(MessageListener)";
+        if ( ! isSubscribing) {
+            if (debug) {
+                System.out.println(msg + " ignored, already unsubscribed");
+            }
+            return null;
+        } else if (debug) {
+            System.out.println(msg);
         }
         mMessageListener = null;
         mSubscribeOptions = null;
-        setSubscribing(false, true, true, true);
-        return null;
+        setSubscribing(false, true, false, false);
+        return mSubscribeTask;
+    }
+
+    @Override
+    public Task<Void> registerStatusCallback(@NonNull StatusCallback statusCallback) {
+        int hashCode = statusCallback.hashCode();
+        statusCallbacks.put(hashCode, statusCallback);
+        if (mStatusTask == null) {
+            mStatusTask = new MockTask();
+            mStatusTask.setComplete(true);
+        }
+        return mStatusTask;
+    }
+
+    @Override
+    public Task<Void> unregisterStatusCallback(@NonNull StatusCallback statusCallback) {
+        int hashCode = statusCallback.hashCode();
+        if ( ! statusCallbacks.containsKey(hashCode)) {
+            return null;
+        }
+
+        statusCallbacks.remove(hashCode);
+        mStatusTask.setComplete(true);
+        return mStatusTask;
     }
 
     /**
@@ -502,6 +583,40 @@ public class MockMessagesClient extends MessagesClient {
                 null,
                 signals
         );
+    }
+
+    /**
+     * Mocks StatusCallback.onPermissionChanged() from StatusCallback passed to registerStatusCallback().
+     *
+     * NOTE: Will not mock any other resulting implementations from the MessageClient
+     * (e.g. will still publish and subscribe after onPermissionChanged)
+     */
+    public void mockStatusCallbackOnPermissionChanged(boolean hasPermission) {
+        checkState();
+        String message = CLASS_TAG + " mockStatusCallbackOnPermissionChanged(" + (hasPermission ? "true" : "false") + ")";
+
+        if (statusCallbacks == null || statusCallbacks.size() == 0) {
+            if (debug) {
+                System.out.println(message + " ignored, no StatusCallback registered in client");
+            }
+            return;
+        }
+
+        if (debug) {
+            System.out.println(message);
+        }
+
+        Set<Integer> hashCodes = statusCallbacks.keySet();
+        for (int hashCode : hashCodes) {
+            StatusCallback callback = statusCallbacks.get(hashCode);
+            if (callback != null) {
+                callback.onPermissionChanged(hasPermission);
+            }
+        }
+
+        mStatusTask.setCanceled( ! hasPermission);
+        mStatusTask.setComplete(hasPermission);
+        mStatusTask.setSuccessful(hasPermission);
     }
 
     /**
@@ -628,12 +743,19 @@ public class MockMessagesClient extends MessagesClient {
         if (debug) {
             System.out.println(CLASS_TAG + " close() mock functions no longer active");
         }
+
+        statusCallbacks.clear();
+        statusCallbacks = null;
         mMessage = null;
         mMessageListener = null;
         mPublishOptions = null;
         mSubscribeOptions = null;
         mockException = null;
 
+        if (mStatusTask != null) {
+            mStatusTask.clear();
+            mStatusTask = null;
+        }
         if (mPublishTask != null) {
             mPublishTask.clear();
             mPublishTask = null;
@@ -836,16 +958,6 @@ public class MockMessagesClient extends MessagesClient {
     @Override
     public Task<Void> unsubscribe(@NonNull PendingIntent pendingIntent) {
         throw new UnsupportedOperationException("Method unsubscribe(PendingIntent) not supported");
-    }
-
-    @Override
-    public Task<Void> registerStatusCallback(@NonNull StatusCallback statusCallback) {
-        throw new UnsupportedOperationException("Method registerStatusCallback(StatusCallback) not supported");
-    }
-
-    @Override
-    public Task<Void> unregisterStatusCallback(@NonNull StatusCallback statusCallback) {
-        throw new UnsupportedOperationException("Method unregisterStatusCallback(StatusCallback) not supported");
     }
 
     @Override

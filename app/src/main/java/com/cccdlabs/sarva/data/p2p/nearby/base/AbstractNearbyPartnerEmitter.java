@@ -5,17 +5,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.nearby.Nearby;
-import com.google.android.gms.nearby.messages.BleSignal;
-import com.google.android.gms.nearby.messages.Distance;
-import com.google.android.gms.nearby.messages.Message;
-import com.google.android.gms.nearby.messages.MessageListener;
-import com.google.android.gms.nearby.messages.MessagesClient;
-import com.google.android.gms.nearby.messages.PublishCallback;
-import com.google.android.gms.nearby.messages.PublishOptions;
-import com.google.android.gms.nearby.messages.Strategy;
-import com.google.android.gms.nearby.messages.SubscribeCallback;
-import com.google.android.gms.nearby.messages.SubscribeOptions;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PermissionException;
 import com.cccdlabs.sarva.data.p2p.nearby.exception.PublishExpiredException;
 import com.cccdlabs.sarva.data.p2p.nearby.exception.SubscribeExpiredException;
 import com.cccdlabs.sarva.data.p2p.nearby.utils.NearbyUtils;
@@ -26,6 +16,18 @@ import com.cccdlabs.sarva.domain.p2p.base.PartnerEmitter;
 import com.cccdlabs.sarva.domain.p2p.exception.InvalidPartnerException;
 import com.cccdlabs.sarva.domain.p2p.exception.UnpairedPartnerException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryQueryException;
+import com.google.android.gms.nearby.Nearby;
+import com.google.android.gms.nearby.messages.BleSignal;
+import com.google.android.gms.nearby.messages.Distance;
+import com.google.android.gms.nearby.messages.Message;
+import com.google.android.gms.nearby.messages.MessageListener;
+import com.google.android.gms.nearby.messages.MessagesClient;
+import com.google.android.gms.nearby.messages.PublishCallback;
+import com.google.android.gms.nearby.messages.PublishOptions;
+import com.google.android.gms.nearby.messages.StatusCallback;
+import com.google.android.gms.nearby.messages.Strategy;
+import com.google.android.gms.nearby.messages.SubscribeCallback;
+import com.google.android.gms.nearby.messages.SubscribeOptions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +55,8 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     protected Context context;
 
     protected Activity activity;
+
+    protected StatusCallback statusCallback;
 
     protected MessageListener messageListener;
 
@@ -134,6 +138,15 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
         }
     }
 
+    private class PartnerStatusCallback extends StatusCallback {
+        @Override
+        public void onPermissionChanged(boolean hasPermission) {
+            if ( ! hasPermission) {
+                emitCancelableError(new PermissionException("Nearby permission not granted"));
+            }
+        }
+    }
+
     private class PartnerSubscribeCallback extends SubscribeCallback {
         @Override
         public void onExpired() {
@@ -154,6 +167,8 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
         this.activity = activity;
         this.repository = repository;
         messagesClient = getMessagesClient();
+        statusCallback = getStatusCallback();
+        messagesClient.registerStatusCallback(statusCallback);
         emitters = new HashMap<>();
         initFlowable();
     }
@@ -163,6 +178,8 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
         this.activity = null;
         this.repository = repository;
         messagesClient = getMessagesClient();
+        statusCallback = getStatusCallback();
+        messagesClient.registerStatusCallback(statusCallback);
         emitters = new HashMap<>();
         initFlowable();
     }
@@ -172,6 +189,11 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     @Override
     public Flowable<PartnerResult> getPartnerEmitter() {
         return flowable;
+    }
+
+    public void pause() {
+        unpublish();
+        unsubscribe();
     }
 
     public boolean isPublishing() {
@@ -214,7 +236,15 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
             : Nearby.getMessagesClient(context);
     }
 
+    protected StatusCallback getStatusCallback() {
+        return new PartnerStatusCallback();
+    }
+
     protected void publish(@NonNull PartnerMessage.Mode mode) {
+        if (isPublishing) {
+            return;
+        }
+
         Context c = context == null ? activity : context;
         message = NearbyUtils.createMessage(c, mode);
 
@@ -229,6 +259,10 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     }
 
     protected void subscribe(FlowableEmitter<PartnerResult> emitter) {
+        if (isSubscribing) {
+            return;
+        }
+
         messageListener = getMessageListener(emitter);
         if (messageListener == null) {
             String message = "Override getMessageListener(FlowableEmitter<PartnerResult>) return value null, cannot subscribe";
@@ -246,21 +280,19 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     }
 
     protected void unpublish() {
-        if (message == null) {
+        if (message == null || ! isPublishing) {
             return;
         }
         messagesClient.unpublish(message);
         isPublishing = false;
-        message = null;
     }
 
     protected void unsubscribe() {
-        if (messageListener == null) {
+        if (messageListener == null || ! isSubscribing) {
             return;
         }
         messagesClient.unsubscribe(messageListener);
         isSubscribing = false;
-        messageListener = null;
     }
 
     protected int registerEmitter(@NonNull FlowableEmitter<PartnerResult> emitter) {
@@ -292,6 +324,11 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
             emitters.clear();
             emitters = null;
         }
+
+        messagesClient.unregisterStatusCallback(statusCallback);
+        statusCallback = null;
+        messageListener = null;
+        message = null;
         context = null;
         activity = null;
         repository = null;

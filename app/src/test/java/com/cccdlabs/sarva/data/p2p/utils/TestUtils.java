@@ -26,13 +26,13 @@ import static org.junit.Assert.fail;
  */
 public final class TestUtils {
 
-    static class TestPartnerSubscriber extends TestSubscriber<PartnerResult> {
+    static class TestAssertPartnerResultSubscriber extends TestSubscriber<PartnerResult> {
 
         final private List<Partner> partners;
         final private int expectedCount;
         private int count = 0;
 
-        public TestPartnerSubscriber(List<Partner> partners) {
+        public TestAssertPartnerResultSubscriber(List<Partner> partners) {
             this.partners = partners;
             expectedCount = partners.size();
         }
@@ -86,12 +86,12 @@ public final class TestUtils {
         assertEquals(objectName + " isActive not equal", expected.isActive(), result.isActive());
     }
 
-    public static TestPartnerSubscriber getTestPartnerSubscriber(List<Partner> partners) {
+    public static TestSubscriber<PartnerResult> getTestAssertPartnerResultSubscriber(List<Partner> partners) {
         if (partners == null) {
             throw new IllegalArgumentException("partners parameter null");
         }
 
-        return new TestPartnerSubscriber(partners);
+        return new TestAssertPartnerResultSubscriber(partners);
     }
 
     public static List<Partner> seedAndConvertToPartners(@NonNull PartnerRepository repository, List<Message> messages,

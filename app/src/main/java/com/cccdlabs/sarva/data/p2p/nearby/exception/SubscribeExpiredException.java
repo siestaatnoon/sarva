@@ -1,7 +1,7 @@
 package com.cccdlabs.sarva.data.p2p.nearby.exception;
 
 /**
- * Runtime exception for when a Nearby Messages object suddenly stops subscribing.
+ * Checked exception for when a Nearby Messages object suddenly stops subscribing.
  *
  * @author Johnny Spence
  * @version 1.0.0

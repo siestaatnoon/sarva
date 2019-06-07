@@ -1,17 +1,17 @@
 package com.cccdlabs.sarva.data.p2p.nearby.exception;
 
 /**
- * Checked exception for when a Nearby Messages object suddenly stops publishing.
+ * Checked exception for when a a user sets the device to not allow Nearby.
  *
  * @author Johnny Spence
  * @version 1.0.0
  */
-public class PublishExpiredException extends NearbyException {
+public class PermissionException extends NearbyException {
 
     /**
      * No argument constructor.
      */
-    public PublishExpiredException() {}
+    public PermissionException() {}
 
     /**
      * Constructor.
@@ -19,7 +19,7 @@ public class PublishExpiredException extends NearbyException {
      * @param message   The error message
      * @param cause     Throwable object triggering this exception
      */
-    public PublishExpiredException(String message, Throwable cause) {
+    public PermissionException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -28,7 +28,7 @@ public class PublishExpiredException extends NearbyException {
      *
      * @param message The error message
      */
-    public PublishExpiredException(String message) {
+    public PermissionException(String message) {
         super(message);
     }
 
@@ -37,7 +37,7 @@ public class PublishExpiredException extends NearbyException {
      *
      * @param cause Throwable object triggering this exception
      */
-    public PublishExpiredException(Throwable cause) {
+    public PermissionException(Throwable cause) {
         super(cause);
     }
 }

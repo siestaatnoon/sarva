@@ -4,11 +4,8 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.google.android.gms.nearby.messages.BleSignal;
-import com.google.android.gms.nearby.messages.Distance;
-import com.google.android.gms.nearby.messages.Message;
-import com.google.android.gms.nearby.messages.MessagesClient;
 import com.cccdlabs.sarva.data.p2p.base.MockMessagesClient;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PermissionException;
 import com.cccdlabs.sarva.data.p2p.nearby.exception.PublishExpiredException;
 import com.cccdlabs.sarva.data.p2p.nearby.exception.SubscribeExpiredException;
 import com.cccdlabs.sarva.data.p2p.nearby.utils.NearbyUtils;
@@ -26,6 +23,10 @@ import com.cccdlabs.sarva.domain.repository.exception.RepositoryQueryException;
 import com.cccdlabs.sarva.presentation.di.components.DaggerTestDataComponent;
 import com.cccdlabs.sarva.presentation.di.components.TestDataComponent;
 import com.cccdlabs.sarva.presentation.di.modules.TestDataModule;
+import com.google.android.gms.nearby.messages.BleSignal;
+import com.google.android.gms.nearby.messages.Distance;
+import com.google.android.gms.nearby.messages.Message;
+import com.google.android.gms.nearby.messages.MessagesClient;
 
 import org.junit.After;
 import org.junit.Before;
@@ -114,7 +115,7 @@ public class NearbyPartnerTransmitterTest {
         );
         final int size = partners.size();
 
-        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestPartnerSubscriber(partners);
+        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
 
@@ -149,7 +150,7 @@ public class NearbyPartnerTransmitterTest {
         );
         final int size = partners.size();
 
-        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestPartnerSubscriber(partners);
+        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
 
@@ -181,7 +182,7 @@ public class NearbyPartnerTransmitterTest {
         );
         final int size = partners.size();
 
-        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestPartnerSubscriber(partners);
+        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
 
@@ -213,7 +214,7 @@ public class NearbyPartnerTransmitterTest {
         );
         final int size = partners.size();
 
-        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestPartnerSubscriber(partners);
+        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
 
@@ -250,7 +251,7 @@ public class NearbyPartnerTransmitterTest {
             partner.setActive(false);
         }
 
-        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestPartnerSubscriber(partners);
+        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
 
@@ -277,33 +278,60 @@ public class NearbyPartnerTransmitterTest {
     }
 
     @Test
-    public void testOnPublishExpiredStopsPubSub() throws Throwable {
-        // First need to trigger onFound() to initialize publishing
-        List<Message> list = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
-        final List<Message> messages = list.subList(0, 1); // only test first onFound() call
-        final List<Partner> partners = TestUtils.seedAndConvertToPartners(
-                mRepository,
-                messages,
-                null,
-                null,
-                true // DB items are set to active prior to onFound() call
-        );
-        final int size = partners.size();
+    public void testOnPermissionChangedFalseStopsPublishing() throws Throwable {
+        // First need to trigger onFound() to initialize publishing, but only one time
+        List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
+        messages = messages.subList(0, 1);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
+        mNearby.getPartnerEmitter().subscribe(subscriberSpy);
+        mClient.mockMessageOnFound(messages);
+        mClient.mockStatusCallbackOnPermissionChanged(false);
 
-        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestPartnerSubscriber(partners);
-        subscriberSpy = spy(subscriberSpy);
+        assertFalse("Nearby client is not publishing", mClient.isPublishing());
+        assertFalse(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+        verify(subscriberSpy, times(1)).onNext(any(PartnerResult.class));
+        verify(subscriberSpy, times(1)).onError(any(PermissionException.class));
+
+        subscriberSpy.onComplete();
+        subscriberSpy.dispose();
+    }
+
+    @Test
+    public void testOnPermissionChangedTrueDoesNothing() throws Throwable {
+        // First need to trigger onFound() to initialize publishing, but only one time
+        List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
+        messages = messages.subList(0, 1);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
+        mNearby.getPartnerEmitter().subscribe(subscriberSpy);
+        mClient.mockMessageOnFound(messages);
+        mClient.mockStatusCallbackOnPermissionChanged(true);
+
+        // need to test just one message received
+        assertTrue("Nearby client is not publishing", mClient.isPublishing());
+        assertTrue(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+        verify(subscriberSpy, times(1)).onNext(any(PartnerResult.class));
+        verify(subscriberSpy, times(0)).onError(any(Exception.class));
+
+        subscriberSpy.onComplete();
+        subscriberSpy.dispose();
+    }
+
+    @Test
+    public void testOnPublishExpiredStopsPubSub() throws Throwable {
+        // First need to trigger onFound() to initialize publishing, but only one time
+        List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
+        messages = messages.subList(0, 1);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
         mClient.mockMessageOnFound(messages);
         mClient.mockPublishExpired();
 
-        // need to test just one message received
-        assertEquals("Number of messages emitted not one", 1, size);
-        verify(subscriberSpy, times(size)).onNext(any(PartnerResult.class));
-        verify(subscriberSpy, times(1)).onError(any(PublishExpiredException.class));
         assertFalse("Nearby client is publishing", mClient.isPublishing());
         assertFalse("Nearby client is subscribing", mClient.isSubscribing());
         assertFalse(OBJECT_NAME + " is publishing", mNearby.isPublishing());
         assertFalse(OBJECT_NAME + " is subscribing", mNearby.isSubscribing());
+        verify(subscriberSpy, times(1)).onNext(any(PartnerResult.class));
+        verify(subscriberSpy, times(1)).onError(any(PublishExpiredException.class));
 
         subscriberSpy.onComplete();
         subscriberSpy.dispose();
@@ -311,30 +339,42 @@ public class NearbyPartnerTransmitterTest {
 
     @Test
     public void testOnSubscribeExpiredStopsPubSub() throws Throwable {
-        TestSubscriber<PartnerResult> subscriber = mNearby.getPartnerEmitter().test();
+        // First need to trigger onFound() to initialize publishing, but only one time
+        List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
+        messages = messages.subList(0, 1);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
+        mNearby.getPartnerEmitter().subscribe(subscriberSpy);
+        mClient.mockMessageOnFound(messages);
         mClient.mockSubscribeExpired();
 
-        subscriber.assertError(SubscribeExpiredException.class);
         assertFalse("Nearby client is publishing", mClient.isPublishing());
         assertFalse("Nearby client is subscribing", mClient.isSubscribing());
         assertFalse(OBJECT_NAME + " is publishing", mNearby.isPublishing());
         assertFalse(OBJECT_NAME + " is subscribing", mNearby.isSubscribing());
+        verify(subscriberSpy, times(1)).onNext(any(PartnerResult.class));
+        verify(subscriberSpy, times(1)).onError(any(SubscribeExpiredException.class));
 
-        subscriber.dispose();
+        subscriberSpy.onComplete();
+        subscriberSpy.dispose();
     }
 
     @Test
     public void testSubscriberCancelStopsPubSub() throws Throwable {
-        TestSubscriber<PartnerResult> subscriber = mNearby.getPartnerEmitter().test();
-        subscriber.cancel();
+        // First need to trigger onFound() to initialize publishing, but only one time
+        List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
+        messages = messages.subList(0, 1);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
+        mNearby.getPartnerEmitter().subscribe(subscriberSpy);
+        mClient.mockMessageOnFound(messages);
+        subscriberSpy.cancel();
 
-        assertTrue("Subscriber not canceled", subscriber.isCancelled());
+        assertTrue("Subscriber not canceled", subscriberSpy.isCancelled());
         assertFalse("Nearby client is publishing", mClient.isPublishing());
         assertFalse("Nearby client is subscribing", mClient.isSubscribing());
         assertFalse(OBJECT_NAME + " is publishing", mNearby.isPublishing());
         assertFalse(OBJECT_NAME + " is subscribing", mNearby.isSubscribing());
 
-        subscriber.dispose();
+        subscriberSpy.dispose();
     }
 
     @Test
@@ -454,5 +494,23 @@ public class NearbyPartnerTransmitterTest {
         mNearby = null;
         mSettings = null;
         mRepository = null;
+    }
+
+    private TestSubscriber<PartnerResult> seedPartnersAndReturnTestSubscriberSpy(List<Message> messages) throws Exception {
+        if (messages == null || messages.size() == 0) {
+            throw new IllegalArgumentException("messages parameter cannot be null or empty List");
+        }
+
+        // First need to trigger onFound() to initialize publishing
+        List<Partner> partners = TestUtils.seedAndConvertToPartners(
+                mRepository,
+                messages,
+                null,
+                null,
+                true // DB items are set to active prior to any callback
+        );
+
+        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
+        return spy(subscriberSpy);
     }
 }

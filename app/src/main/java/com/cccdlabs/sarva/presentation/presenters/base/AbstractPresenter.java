@@ -10,7 +10,7 @@ import com.cccdlabs.sarva.presentation.views.base.BaseView;
  * @author Johnny Spence
  * @version 1.0.0
  */
-public abstract class AbstractPresenter<M> implements Presenter {
+abstract public class AbstractPresenter<M> implements Presenter {
 
     /**
      * {@link Repository} used by the Presenter.

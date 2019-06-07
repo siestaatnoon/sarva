@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PermissionException;
 import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.nearby.messages.MessagesClient;
 import com.cccdlabs.sarva.data.p2p.base.MockMessagesClient;
@@ -80,6 +81,30 @@ public class NearbyPartnerBroadcastTest {
         assertEquals("Username not equal", TEST_USERNAME, partnerMessage.getUsername());
         assertEquals("Device name not equal", NearbyUtils.getDeviceName(), partnerMessage.getDeviceName());
         assertEquals("Mode not equal", PartnerMessage.Mode.PAIR, partnerMessage.getMode());
+    }
+
+    @Test
+    public void testOnPermissionChangedFalseStopsPublishing() throws Throwable {
+        TestSubscriber<PartnerResult> subscriber = mNearby.getPartnerEmitter().test();
+        mClient.mockStatusCallbackOnPermissionChanged(false);
+
+        subscriber.assertError(PermissionException.class);
+        assertFalse("Nearby client is not publishing", mClient.isPublishing());
+        assertFalse(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+
+        subscriber.dispose();
+    }
+
+    @Test
+    public void testOnPermissionChangedTrueDoesNothing() throws Throwable {
+        TestSubscriber<PartnerResult> subscriber = mNearby.getPartnerEmitter().test();
+        mClient.mockStatusCallbackOnPermissionChanged(true);
+
+        subscriber.assertNoErrors();
+        assertTrue("Nearby client is not publishing", mClient.isPublishing());
+        assertTrue(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+
+        subscriber.dispose();
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.cccdlabs.sarva.data.p2p.nearby.exception;
 
 /**
- * Root Exception for runtime errors in the <code>p2p/nearby</code> package.
+ * Root Exception for checked errors in the <code>p2p/nearby</code> package.
  *
  * @author Johnny Spence
  * @version 1.0.0

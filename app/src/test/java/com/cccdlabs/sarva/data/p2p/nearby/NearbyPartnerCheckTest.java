@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PermissionException;
 import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.nearby.messages.MessagesClient;
 import com.cccdlabs.sarva.data.p2p.base.MockMessagesClient;
@@ -114,7 +115,7 @@ public class NearbyPartnerCheckTest {
         );
         final int size = partners.size();
 
-        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestPartnerSubscriber(partners);
+        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
 
@@ -152,7 +153,7 @@ public class NearbyPartnerCheckTest {
             partner.setActive(false);
         }
 
-        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestPartnerSubscriber(partners);
+        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
 
@@ -170,6 +171,30 @@ public class NearbyPartnerCheckTest {
 
         subscriberSpy.onComplete();
         subscriberSpy.dispose();
+    }
+
+    @Test
+    public void testOnPermissionChangedFalseStopsPublishing() throws Throwable {
+        TestSubscriber<PartnerResult> subscriber = mNearby.getPartnerEmitter().test();
+        mClient.mockStatusCallbackOnPermissionChanged(false);
+
+        subscriber.assertError(PermissionException.class);
+        assertFalse("Nearby client is not publishing", mClient.isPublishing());
+        assertFalse(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+
+        subscriber.dispose();
+    }
+
+    @Test
+    public void testOnPermissionChangedTrueDoesNothing() throws Throwable {
+        TestSubscriber<PartnerResult> subscriber = mNearby.getPartnerEmitter().test();
+        mClient.mockStatusCallbackOnPermissionChanged(true);
+
+        subscriber.assertNoErrors();
+        assertTrue("Nearby client is not publishing", mClient.isPublishing());
+        assertTrue(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+
+        subscriber.dispose();
     }
 
     @Test
