@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.cccdlabs.sarva.data.entity.base.Entity;
-import com.cccdlabs.sarva.data.network.base.ApiResponse;
+import com.cccdlabs.sarva.domain.network.base.ApiResponse;
 
 import java.lang.reflect.Type;
 import java.util.List;

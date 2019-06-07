@@ -1,8 +1,8 @@
 package com.cccdlabs.sarva.data.network.retrofit;
 
 import com.google.gson.JsonObject;
-import com.cccdlabs.sarva.data.network.base.ApiError;
-import com.cccdlabs.sarva.data.network.base.ApiResponse;
+import com.cccdlabs.sarva.domain.network.base.ApiError;
+import com.cccdlabs.sarva.domain.network.base.ApiResponse;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;

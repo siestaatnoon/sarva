@@ -1,4 +1,4 @@
-package com.cccdlabs.sarva.data.network.base;
+package com.cccdlabs.sarva.domain.network.base;
 
 import androidx.annotation.NonNull;
 

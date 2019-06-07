@@ -35,8 +35,8 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Introducing... the MockMessageClient! Bypasses the Google Play Services verification and allows
- * for unit testing classes utilizing the Nearby Messages API and primarily the publish() and
- * subscribe() methods. Methods in this class are set to run synchronously.
+ * for unit testing classes utilizing the Nearby Messages API publish() and
+ * subscribe() methods. Methods in this class are implemented to run synchronously.
  *
  */
 public class MockMessagesClient extends MessagesClient {
@@ -65,7 +65,7 @@ public class MockMessagesClient extends MessagesClient {
     }
 
     /**
-     * Saves objects from publish() and subscribe() to reset the state of this client object.
+     * Saves members from publish() and subscribe() to reset the state of this client object.
      */
     private class ClientState {
 
@@ -196,10 +196,16 @@ public class MockMessagesClient extends MessagesClient {
             return this;
         }
 
+        /**
+         * Extra method to mock an exception.
+         */
         void setException(Exception exception) {
             thrownException = exception;
         }
 
+        /**
+         * Extra method to mock OnCompleteListener.
+         */
         void setComplete(boolean complete) {
             if (onCompleteListener != null) {
                 onCompleteListener.onComplete(this);
@@ -207,6 +213,9 @@ public class MockMessagesClient extends MessagesClient {
             isComplete = complete;
         }
 
+        /**
+         * Extra method to mock OnSuccessListener.
+         */
         void setSuccessful(boolean successful) {
             if (onSuccessListener != null) {
                 onSuccessListener.onSuccess(null);
@@ -214,6 +223,9 @@ public class MockMessagesClient extends MessagesClient {
             isSuccessful = successful;
         }
 
+        /**
+         * Extra method to mock OnCanceledListener.
+         */
         void setCanceled(boolean canceled) {
             if (onCanceledListener != null) {
                 onCanceledListener.onCanceled();
@@ -221,6 +233,9 @@ public class MockMessagesClient extends MessagesClient {
             isCanceled = canceled;
         }
 
+        /**
+         * Easy GC.
+         */
         void clear() {
             onSuccessListener = null;
             onCompleteListener = null;
@@ -254,6 +269,11 @@ public class MockMessagesClient extends MessagesClient {
     }
 
 
+    /**
+     * MockMessagesClient may be initialized with an Activity or Context (or instrumentation Context).
+     * Note that this will not reproduce any any automated Nearby notifications in the UI
+     * as the real class does.
+     */
     public MockMessagesClient(@NonNull Activity activity) {
         this(activity, false);
     }
@@ -278,6 +298,9 @@ public class MockMessagesClient extends MessagesClient {
         isClosed = false;
     }
 
+    /**
+     * NOTE: returns null Task<Void> if called more than once.
+     */
     @Override
     public Task<Void> publish(@NonNull Message message) {
         return publish(message, null);
@@ -291,7 +314,9 @@ public class MockMessagesClient extends MessagesClient {
         checkState();
         String msg = CLASS_TAG + " publish(Message" + (publishOptions == null ? "" : ", PublishOptions") + ")";
         if (isPublishing) {
-            System.out.println(msg + " ignored, already publishing");
+            if (debug) {
+                System.out.println(msg + " ignored, already publishing");
+            }
             return null;
         } else if (debug) {
             System.out.println(msg);
@@ -306,6 +331,9 @@ public class MockMessagesClient extends MessagesClient {
         return mPublishTask;
     }
 
+    /**
+     * NOTE: returns null Task<Void> if called more than once.
+     */
     @Override
     public Task<Void> subscribe(@NonNull MessageListener messageListener) {
         return subscribe(messageListener, null);
@@ -358,6 +386,9 @@ public class MockMessagesClient extends MessagesClient {
         return null;
     }
 
+    /**
+     * Returns the {@link Message} sent after a call to publish(). Not publishing, no message.
+     */
     public Message capturePublishMessage() {
         if (isPublishing) {
             if (debug) {
@@ -371,6 +402,11 @@ public class MockMessagesClient extends MessagesClient {
         return null;
     }
 
+    /**
+     * Mocks the {@link MessageListener} onFound(Message) callback.
+     *
+     * Optional delays parameter is delay in ms before onBleSignalChanged() call performed with corresponding Message.
+     */
     public void mockMessageOnFound(List<Message> messages) {
         mockMessageOnFound(messages, null);
     }
@@ -389,6 +425,11 @@ public class MockMessagesClient extends MessagesClient {
         );
     }
 
+    /**
+     * Mocks the {@link MessageListener} onLost(Message) callback.
+     *
+     * Optional delays parameter is delay in ms before onBleSignalChanged() call performed with corresponding Message.
+     */
     public void mockMessageOnLost(List<Message> messages) {
         mockMessageOnLost(messages, null);
     }
@@ -407,6 +448,13 @@ public class MockMessagesClient extends MessagesClient {
         );
     }
 
+    /**
+     * Mocks the {@link MessageListener} onDistanceChanged(Message, Distance) callback.
+     *
+     * Parameter distances is set of {@link Distance} objects corresponding to the set in messages parameter
+     *
+     * Optional delays parameter is delay in ms before onBleSignalChanged() call performed with corresponding Message.
+     */
     public void mockMessageOnDistanceChanged(List<Message> messages, List<Distance> distances) {
         mockMessageOnDistanceChanged(messages, distances, null);
     }
@@ -428,6 +476,13 @@ public class MockMessagesClient extends MessagesClient {
         );
     }
 
+    /**
+     * Mocks the {@link MessageListener} onBleSignalChanged(Message, BleSignal) callback.
+     *
+     * Parameter distances is set of {@link BleSignal} objects corresponding to the set in messages parameter
+     *
+     * Optional delays parameter is delay in ms before onBleSignalChanged() call performed with corresponding Message.
+     */
     public void mockMessageOnBleSignalChanged(List<Message> messages, List<BleSignal> signals) {
         mockMessageOnBleSignalChanged(messages, signals, null);
     }
@@ -449,6 +504,13 @@ public class MockMessagesClient extends MessagesClient {
         );
     }
 
+    /**
+     * Mocks an exception thrown in any of the mock onFound, onLost, onDistanceChanged and
+     * onBleSignalChanged calls.
+     *
+     * Optional index parameter is index, within the set of messages used in the mock callbacks,
+     * to throw the exception.
+     */
     public void mockMessageCallbackException(@NonNull Throwable throwable) {
         mockMessageCallbackException(throwable, -1);
     }
@@ -459,6 +521,9 @@ public class MockMessagesClient extends MessagesClient {
         mockExceptionIndex = index;
     }
 
+    /**
+     * Mocks the PublishCallback.onExpired() passed in a PublishOptions in a publish() call-
+     */
     public void mockPublishExpired() {
         checkState();
         if (mPublishOptions != null) {
@@ -478,6 +543,9 @@ public class MockMessagesClient extends MessagesClient {
         }
     }
 
+    /**
+     * Mocks the SubscribeCallback.onExpired() passed in a SubscribeOptions in a subscribe() call-
+     */
     public void mockSubscribeExpired() {
         checkState();
         if (mSubscribeOptions != null) {
@@ -497,6 +565,10 @@ public class MockMessagesClient extends MessagesClient {
         }
     }
 
+    /**
+     * Resets this mock MessageClient to it's original state in the case a mock exception was thrown
+     * or unsubscribe/unpublish was called on this object.
+     */
     public void reset() {
         checkState();
         boolean isResetable = false;
@@ -542,10 +614,16 @@ public class MockMessagesClient extends MessagesClient {
         return isSubscribing;
     }
 
+    /**
+     * If MessageClient closed then mock functions can no longer be performed.
+     */
     public boolean isClosed() {
         return isClosed;
     }
 
+    /**
+     * GC fun.
+     */
     public void close() {
         if (debug) {
             System.out.println(CLASS_TAG + " close() mock functions no longer active");
@@ -709,12 +787,19 @@ public class MockMessagesClient extends MessagesClient {
         }
     }
 
+    /**
+     * Makes sure the close() method wasn't called prior to a mock method, otherwise
+     * throws an exception.
+     */
     private void checkState() {
         if (isClosed) {
             throw new IllegalStateException(CLASS_TAG + " close() already called on MockMessagesClient");
         }
     }
 
+    /**
+     * Sets the publishing state and mocks the Task<Void> callbacks returned from publish().
+     */
     private void setPublishing(boolean isPublishing, boolean taskCanceled, boolean taskComplete,
             boolean taskSuccessful) {
         if (mPublishTask != null) {
@@ -725,6 +810,9 @@ public class MockMessagesClient extends MessagesClient {
         this.isPublishing = isPublishing;
     }
 
+    /**
+     * Sets the subscribing state and mocks the Task<Void> callbacks returned from subscribe().
+     */
     private void setSubscribing(boolean isSubscribing, boolean taskCanceled, boolean taskComplete,
             boolean taskSuccessful) {
         if (mSubscribeTask != null) {

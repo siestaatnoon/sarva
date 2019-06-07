@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.cccdlabs.sarva.data.entity.TestEntity;
 import com.cccdlabs.sarva.data.entity.base.Entity;
-import com.cccdlabs.sarva.data.network.base.ApiResponse;
+import com.cccdlabs.sarva.domain.network.base.ApiResponse;
 import com.cccdlabs.sarva.presentation.di.components.DaggerTestAppComponent;
 import com.cccdlabs.sarva.presentation.di.components.TestAppComponent;
 import com.cccdlabs.sarva.presentation.di.modules.TestAppModule;

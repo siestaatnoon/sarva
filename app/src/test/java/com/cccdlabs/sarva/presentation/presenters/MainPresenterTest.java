@@ -3,7 +3,7 @@ package com.cccdlabs.sarva.presentation.presenters;
 import android.content.Context;
 
 import com.cccdlabs.sarva.R;
-import com.cccdlabs.sarva.data.network.exception.NetworkConnectionException;
+import com.cccdlabs.sarva.domain.network.exception.NetworkConnectionException;
 import com.cccdlabs.sarva.data.repository.sample.GizmoRepository;
 import com.cccdlabs.sarva.domain.interactors.sample.SampleDisplayUseCase;
 import com.cccdlabs.sarva.domain.model.sample.Gizmo;

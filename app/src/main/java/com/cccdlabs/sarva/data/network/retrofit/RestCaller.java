@@ -11,9 +11,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.cccdlabs.sarva.data.Constants;
 import com.cccdlabs.sarva.data.entity.base.Entity;
-import com.cccdlabs.sarva.data.network.base.ApiCaller;
-import com.cccdlabs.sarva.data.network.base.ApiResponse;
-import com.cccdlabs.sarva.data.network.exception.NetworkConnectionException;
+import com.cccdlabs.sarva.domain.network.base.ApiCaller;
+import com.cccdlabs.sarva.domain.network.base.ApiResponse;
+import com.cccdlabs.sarva.domain.network.exception.NetworkConnectionException;
 import com.cccdlabs.sarva.data.network.utils.NetworkUtils;
 
 import java.io.IOException;

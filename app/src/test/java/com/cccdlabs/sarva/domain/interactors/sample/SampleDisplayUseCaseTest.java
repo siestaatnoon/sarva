@@ -1,6 +1,6 @@
 package com.cccdlabs.sarva.domain.interactors.sample;
 
-import com.cccdlabs.sarva.data.network.exception.NetworkConnectionException;
+import com.cccdlabs.sarva.domain.network.exception.NetworkConnectionException;
 import com.cccdlabs.sarva.data.repository.sample.GizmoRepository;
 import com.cccdlabs.sarva.domain.model.sample.Gizmo;
 import com.cccdlabs.sarva.presentation.di.components.DaggerTestUseCaseComponent;

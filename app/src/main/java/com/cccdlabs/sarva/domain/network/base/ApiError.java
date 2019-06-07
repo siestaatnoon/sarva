@@ -1,4 +1,4 @@
-package com.cccdlabs.sarva.data.network.base;
+package com.cccdlabs.sarva.domain.network.base;
 
 /**
  * Abstraction for determining Exception types that occur in the networking API.

@@ -1,4 +1,4 @@
-package com.cccdlabs.sarva.data.network.exception;
+package com.cccdlabs.sarva.domain.network.exception;
 
 /**
  * Exception for when no internet connection exists for network tasks.

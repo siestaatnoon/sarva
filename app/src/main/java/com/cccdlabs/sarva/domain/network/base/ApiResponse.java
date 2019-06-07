@@ -1,4 +1,4 @@
-package com.cccdlabs.sarva.data.network.base;
+package com.cccdlabs.sarva.domain.network.base;
 
 import com.google.gson.JsonObject;
 import com.cccdlabs.sarva.data.entity.base.Entity;

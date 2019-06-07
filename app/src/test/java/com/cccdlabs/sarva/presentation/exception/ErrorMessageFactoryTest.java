@@ -3,7 +3,7 @@ package com.cccdlabs.sarva.presentation.exception;
 import android.content.Context;
 
 import com.cccdlabs.sarva.R;
-import com.cccdlabs.sarva.data.network.exception.NetworkConnectionException;
+import com.cccdlabs.sarva.domain.network.exception.NetworkConnectionException;
 import com.cccdlabs.sarva.data.network.retrofit.RestException;
 import com.cccdlabs.sarva.data.network.retrofit.RestResponse;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryDeleteException;
