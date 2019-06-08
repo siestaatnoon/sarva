@@ -70,12 +70,12 @@ public class NearbyPartnerCheck extends AbstractNearbyPartnerEmitter {
 
     public NearbyPartnerCheck(@NonNull Activity activity, @NonNull PartnerRepository repository) {
         super(activity, repository);
-        publish(PartnerMessage.Mode.CHECK);
+        publish();
     }
 
     public NearbyPartnerCheck(@NonNull Context context, @NonNull PartnerRepository repository) {
         super(context, repository);
-        publish(PartnerMessage.Mode.CHECK);
+        publish();
     }
 
     @Override
@@ -83,5 +83,10 @@ public class NearbyPartnerCheck extends AbstractNearbyPartnerEmitter {
         return messageListener == null
             ? new PartnerCheckMessageListener(emitter)
             : messageListener;
+    }
+
+    @Override
+    protected PartnerMessage.Mode getPublishMode() {
+        return PartnerMessage.Mode.CHECK;
     }
 }

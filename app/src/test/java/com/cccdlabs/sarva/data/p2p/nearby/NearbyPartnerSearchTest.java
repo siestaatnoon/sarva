@@ -4,12 +4,8 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.cccdlabs.sarva.data.p2p.nearby.exception.PermissionException;
-import com.google.android.gms.nearby.messages.BleSignal;
-import com.google.android.gms.nearby.messages.Distance;
-import com.google.android.gms.nearby.messages.Message;
-import com.google.android.gms.nearby.messages.MessagesClient;
 import com.cccdlabs.sarva.data.p2p.base.MockMessagesClient;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PermissionException;
 import com.cccdlabs.sarva.data.p2p.nearby.exception.PublishExpiredException;
 import com.cccdlabs.sarva.data.p2p.nearby.exception.SubscribeExpiredException;
 import com.cccdlabs.sarva.data.p2p.nearby.utils.NearbyUtils;
@@ -27,6 +23,10 @@ import com.cccdlabs.sarva.domain.repository.exception.RepositoryQueryException;
 import com.cccdlabs.sarva.presentation.di.components.DaggerTestDataComponent;
 import com.cccdlabs.sarva.presentation.di.components.TestDataComponent;
 import com.cccdlabs.sarva.presentation.di.modules.TestDataModule;
+import com.google.android.gms.nearby.messages.BleSignal;
+import com.google.android.gms.nearby.messages.Distance;
+import com.google.android.gms.nearby.messages.Message;
+import com.google.android.gms.nearby.messages.MessagesClient;
 
 import org.junit.After;
 import org.junit.Before;
@@ -242,13 +242,43 @@ public class NearbyPartnerSearchTest {
     }
 
     @Test
-    public void testOnPermissionChangedFalseStopsPublishing() throws Throwable {
+    public void testPauseStopsPubSubAndResumeStartsPubSubAgain() throws Throwable {
+        TestSubscriber<PartnerResult> subscriber = mNearby.getPartnerEmitter().test();
+
+        // First make sure is publishing and subscribing
+        assertTrue("Nearby client is not publishing before pauseEmitter()", mClient.isPublishing());
+        assertTrue("Nearby client is not subscribing before pauseEmitter()", mClient.isSubscribing());
+        assertTrue(OBJECT_NAME + " is not publishing before pauseEmitter()", mNearby.isPublishing());
+        assertTrue(OBJECT_NAME + " is not subscribing before pauseEmitter()", mNearby.isSubscribing());
+
+        mNearby.pauseEmitter();
+
+        assertFalse("Nearby client is publishing after pauseEmitter()", mClient.isPublishing());
+        assertFalse("Nearby client is subscribing after pauseEmitter()", mClient.isSubscribing());
+        assertFalse(OBJECT_NAME + " is publishing after pauseEmitter()", mNearby.isPublishing());
+        assertFalse(OBJECT_NAME + " is subscribing after pauseEmitter()", mNearby.isSubscribing());
+
+        mNearby.resumeEmitter();
+
+        assertTrue("Nearby client is not publishing after resumeEmitter()", mClient.isPublishing());
+        assertTrue("Nearby client is not subscribing after resumeEmitter()", mClient.isSubscribing());
+        assertTrue(OBJECT_NAME + " is not publishing after resumeEmitter()", mNearby.isPublishing());
+        assertTrue(OBJECT_NAME + " is not subscribing after resumeEmitter()", mNearby.isSubscribing());
+
+        subscriber.assertNoErrors();
+        subscriber.dispose();
+    }
+
+    @Test
+    public void testOnPermissionChangedFalseStopsPubSub() throws Throwable {
         TestSubscriber<PartnerResult> subscriber = mNearby.getPartnerEmitter().test();
         mClient.mockStatusCallbackOnPermissionChanged(false);
 
         subscriber.assertError(PermissionException.class);
-        assertFalse("Nearby client is not publishing", mClient.isPublishing());
-        assertFalse(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+        assertFalse("Nearby client is publishing", mClient.isPublishing());
+        assertFalse("Nearby client is subscribing", mClient.isSubscribing());
+        assertFalse(OBJECT_NAME + " is publishing", mNearby.isPublishing());
+        assertFalse(OBJECT_NAME + " is subscribing", mNearby.isSubscribing());
 
         subscriber.dispose();
     }
@@ -260,7 +290,9 @@ public class NearbyPartnerSearchTest {
 
         subscriber.assertNoErrors();
         assertTrue("Nearby client is not publishing", mClient.isPublishing());
+        assertTrue("Nearby client is not subscribing", mClient.isSubscribing());
         assertTrue(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+        assertTrue(OBJECT_NAME + " is not subscribing", mNearby.isSubscribing());
 
         subscriber.dispose();
     }

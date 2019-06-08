@@ -41,7 +41,7 @@ public class NearbyPartnerBroadcast extends AbstractNearbyPartnerEmitter {
                                     emitter.onComplete(); // Up to subscriber to cancel Flowable
                                 }
                             });
-                            publish(PartnerMessage.Mode.PAIR);
+                            publish();
                             emitter.onNext(new PartnerResult(true));
                         } catch (Exception e) {
                             if (!emitter.isCancelled()) {
@@ -62,5 +62,10 @@ public class NearbyPartnerBroadcast extends AbstractNearbyPartnerEmitter {
     @Override
     protected MessageListener getMessageListener(FlowableEmitter<PartnerResult> emitter) {
         return null;
+    }
+
+    @Override
+    protected PartnerMessage.Mode getPublishMode() {
+        return PartnerMessage.Mode.PAIR;
     }
 }

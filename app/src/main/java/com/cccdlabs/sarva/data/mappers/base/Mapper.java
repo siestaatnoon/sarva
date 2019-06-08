@@ -6,7 +6,10 @@ import com.cccdlabs.sarva.domain.model.base.Model;
 import java.util.List;
 
 /**
- * Abstraction to map an {@link Entity} subclass in the <code>data</code> package with an
+ * NOTE: Requires API 24+ to use static interface methods, at the moment UiModelMapper
+ * do not implement this interface.
+ * <p>
+ * Abstraction to map an {@link Entity} subclass in the <code>data</code> package with a
  * {@link Model} subclass in the <code>domain</code> package. Converts single objects or
  * {@link List} of objects to and from the model objects of each package. Although the getter and
  * setter methods between the two packages may have similar names, keeping the models in their

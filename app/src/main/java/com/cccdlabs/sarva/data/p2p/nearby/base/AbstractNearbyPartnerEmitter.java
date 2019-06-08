@@ -46,7 +46,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
 
     protected final MessagesClient messagesClient;
 
-    protected static Map<Integer, FlowableEmitter<PartnerResult>> emitters;
+    protected Map<Integer, FlowableEmitter<PartnerResult>> emitters;
 
     protected Flowable<PartnerResult> flowable;
 
@@ -65,6 +65,8 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     protected boolean isPublishing;
 
     protected boolean isSubscribing;
+
+    private boolean wasPublishing;
 
 
     public class PartnerMessageListener extends MessageListener {
@@ -186,14 +188,35 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
 
     abstract protected MessageListener getMessageListener(FlowableEmitter<PartnerResult> emitter);
 
+    abstract protected PartnerMessage.Mode getPublishMode();
+
     @Override
     public Flowable<PartnerResult> getPartnerEmitter() {
         return flowable;
     }
 
-    public void pause() {
+    @Override
+    public void pauseEmitter() {
+        wasPublishing = isPublishing;
         unpublish();
         unsubscribe();
+    }
+
+    @Override
+    public void resumeEmitter() {
+        if (wasPublishing) {
+            publish();
+        }
+
+        if (emitters != null && emitters.size() > 0) {
+            Set<Integer> keys = emitters.keySet();
+            for (Integer key : keys) {
+                FlowableEmitter<PartnerResult> emitter = emitters.get(key);
+                if (emitter != null) {
+                    subscribe(emitter);
+                }
+            }
+        }
     }
 
     public boolean isPublishing() {
@@ -210,7 +233,6 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
                     @Override
                     public void subscribe(final FlowableEmitter<PartnerResult> emitter) throws Exception {
                         try {
-                            registerEmitter(emitter);
                             emitter.setCancellable(new Cancellable() {
                                 @Override
                                 public void cancel() throws Exception {
@@ -240,11 +262,15 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
         return new PartnerStatusCallback();
     }
 
-    protected void publish(@NonNull PartnerMessage.Mode mode) {
+    protected void publish() {
         if (isPublishing) {
             return;
         }
 
+        PartnerMessage.Mode mode = getPublishMode();
+        if (mode == null) {
+            mode = PartnerMessage.Mode.DEFAULT;
+        }
         Context c = context == null ? activity : context;
         message = NearbyUtils.createMessage(c, mode);
 
@@ -263,6 +289,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
             return;
         }
 
+        registerEmitter(emitter);
         messageListener = getMessageListener(emitter);
         if (messageListener == null) {
             String message = "Override getMessageListener(FlowableEmitter<PartnerResult>) return value null, cannot subscribe";
@@ -284,6 +311,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
             return;
         }
         messagesClient.unpublish(message);
+        message = null;
         isPublishing = false;
     }
 
@@ -292,12 +320,15 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
             return;
         }
         messagesClient.unsubscribe(messageListener);
+        messageListener = null;
         isSubscribing = false;
     }
 
     protected int registerEmitter(@NonNull FlowableEmitter<PartnerResult> emitter) {
         int hashCode = emitter.hashCode();
-        emitters.put(hashCode, emitter);
+        if (!emitters.containsKey(hashCode)) {
+            emitters.put(hashCode, emitter);
+        }
         return hashCode;
     }
 
@@ -327,8 +358,6 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
 
         messagesClient.unregisterStatusCallback(statusCallback);
         statusCallback = null;
-        messageListener = null;
-        message = null;
         context = null;
         activity = null;
         repository = null;

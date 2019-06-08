@@ -9,6 +9,12 @@ import android.content.Context;
  * @version 1.0.0
  */
 public interface BaseView {
+
+    /**
+     * Get a {@link Context}.
+     */
+    Context context();
+
     /**
      * Show a view with a progress bar indicating a loading process.
      */
@@ -35,9 +41,4 @@ public interface BaseView {
      * @param message A string representing an error.
      */
     void showError(String message);
-
-    /**
-     * Get a {@link Context}.
-     */
-    Context context();
 }

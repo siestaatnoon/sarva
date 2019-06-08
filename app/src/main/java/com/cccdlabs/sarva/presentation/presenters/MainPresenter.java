@@ -2,71 +2,90 @@ package com.cccdlabs.sarva.presentation.presenters;
 
 import android.content.Context;
 
-import com.cccdlabs.sarva.data.repository.sample.GizmoRepository;
+import com.cccdlabs.sarva.data.p2p.nearby.NearbyPartnerBroadcast;
+import com.cccdlabs.sarva.data.repository.partners.PartnerRepository;
 import com.cccdlabs.sarva.domain.executor.ExecutorThread;
 import com.cccdlabs.sarva.domain.executor.MainThread;
-import com.cccdlabs.sarva.domain.interactors.sample.SampleDisplayUseCase;
-import com.cccdlabs.sarva.domain.model.sample.Gizmo;
-import com.cccdlabs.sarva.presentation.mappers.sample.GizmoUiModelMapper;
-import com.cccdlabs.sarva.presentation.model.sample.GizmoUiModel;
+import com.cccdlabs.sarva.domain.interactors.partners.PartnerBroadcastUseCase;
+import com.cccdlabs.sarva.domain.model.partners.Partner;
+import com.cccdlabs.sarva.domain.model.partners.PartnerResult;
 import com.cccdlabs.sarva.presentation.presenters.base.AbstractPresenter;
-import com.cccdlabs.sarva.presentation.presenters.observers.PresenterObserver;
+import com.cccdlabs.sarva.presentation.presenters.observers.PresenterDisposableSubscriber;
 import com.cccdlabs.sarva.presentation.views.MainView;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.functions.Function;
+public class MainPresenter extends AbstractPresenter<Partner> {
 
-public class MainPresenter extends AbstractPresenter<Gizmo> {
-
-    @Inject SampleDisplayUseCase mUseCase;
+    @Inject PartnerBroadcastUseCase mUseCase;
+    @Inject NearbyPartnerBroadcast mEmitter;
     @Inject ExecutorThread mExecutorThread;
     @Inject MainThread mMainThread;
     @Inject Context mContext;
 
-    class ShowSampleDisplayObserver extends PresenterObserver<List<GizmoUiModel>> {
+    private PresenterDisposableSubscriber<PartnerResult> mSubscriber;
+    private boolean hasStartedPubSub;
 
-        private ShowSampleDisplayObserver() {
+    class PartnerBroadcastSubscriber extends PresenterDisposableSubscriber<PartnerResult> {
+
+        private MainView mainView;
+
+        private PartnerBroadcastSubscriber() {
             super(mContext, MainPresenter.this);
+            mainView = (MainView) getView();
         }
 
         @Override
-        public void onSuccess(final List<GizmoUiModel> items) {
-            ((MainView) getView()).showGizmos(items);
+        public void onNext(final PartnerResult result) {
+            mainView.onBroadcastUpdate(result.hasPublished());
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            super.onError(t);
+            endBroadcast();
+        }
+
+        @Override
+        public void onComplete() {
+            mainView.onBroadcastUpdate(false);
+            mainView = null;
         }
     }
 
-    public MainPresenter(final GizmoRepository repository, final MainView view) {
+    public MainPresenter(final PartnerRepository repository, final MainView view) {
         super(repository, view);
     }
 
-    public void getAllGizmos() {
-        mUseCase.execute(null)
-                .map(new Function<List<Gizmo>, List<GizmoUiModel>>() {
-                    @Override
-                    public List<GizmoUiModel> apply(List<Gizmo> items) throws Exception {
-                        return GizmoUiModelMapper.fromDomainModel(items);
-                    }
-                })
+    public void startBroadcast() {
+        mSubscriber = getPartnerBroadcastSubscriber();
+        mUseCase.emit(null)
                 .subscribeOn(mExecutorThread.getScheduler())
                 .observeOn(mMainThread.getScheduler())
-                .subscribe(getShowSampleDisplayObserver());
+                .subscribe(mSubscriber);
+        hasStartedPubSub = true;
     }
 
-    ShowSampleDisplayObserver getShowSampleDisplayObserver() {
-        return new ShowSampleDisplayObserver();
+    public void endBroadcast() {
+        if ( ! mSubscriber.isDisposed()) {
+            mSubscriber.onComplete();
+            mSubscriber.dispose();
+            mSubscriber = null;
+        }
     }
 
     @Override
     public void resume() {
-        getAllGizmos();
+        if (hasStartedPubSub) {
+            mUseCase.resumeEmitterSource();
+        } else {
+            startBroadcast();
+        }
     }
 
     @Override
     public void pause() {
-
+        mUseCase.pauseEmitterSource();
     }
 
     @Override
@@ -76,11 +95,15 @@ public class MainPresenter extends AbstractPresenter<Gizmo> {
 
     @Override
     public void destroy() {
-
+        endBroadcast();
     }
 
     @Override
     public void onError(final String message) {
         getView().showError(message);
+    }
+
+    protected PresenterDisposableSubscriber<PartnerResult> getPartnerBroadcastSubscriber() {
+        return new PartnerBroadcastSubscriber();
     }
 }

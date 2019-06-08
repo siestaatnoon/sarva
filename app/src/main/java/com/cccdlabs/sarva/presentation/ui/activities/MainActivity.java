@@ -13,33 +13,20 @@ import com.cccdlabs.sarva.presentation.di.HasComponent;
 import com.cccdlabs.sarva.presentation.di.components.AppComponent;
 import com.cccdlabs.sarva.presentation.di.components.DaggerMainComponent;
 import com.cccdlabs.sarva.presentation.di.components.MainComponent;
-import com.cccdlabs.sarva.presentation.model.sample.GizmoUiModel;
 import com.cccdlabs.sarva.presentation.presenters.MainPresenter;
 import com.cccdlabs.sarva.presentation.ui.activities.base.BaseAppCompatActivity;
-import com.cccdlabs.sarva.presentation.ui.adapters.SampleAdapter;
 import com.cccdlabs.sarva.presentation.views.MainView;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import timber.log.Timber;
 
 public class MainActivity extends BaseAppCompatActivity implements MainView, HasComponent<MainComponent> {
 
     @Inject MainPresenter mPresenter;
-    @Inject SampleAdapter mAdapter;
 
     private MainComponent mMainComponent;
     private Context mContext;
-
-    /**
-     * TODO: Convert to Butterknife
-     */
-    //@BindView(R.id.gizmo_list)
-    RecyclerView mRecyclerView;
 
 
     @Override
@@ -47,14 +34,9 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // TODO: Convert to Butterknife
-        // ButterKnife.bind(this);
-
         AppComponent appComponent = getAppComponent();
-        appComponent.inject(appComponent.widgetMapper());
-        appComponent.inject(appComponent.gizmoMapper());
-        appComponent.inject(appComponent.widgetRepository());
-        appComponent.inject(appComponent.gizmoRepository());
+        appComponent.inject(appComponent.partnerMapper());
+        appComponent.inject(appComponent.partnerRepository());
 
         mMainComponent = DaggerMainComponent.builder()
                 .appComponent(appComponent)
@@ -63,19 +45,8 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
 
         mMainComponent.inject(this);
         mMainComponent.inject(mPresenter);
-        mMainComponent.inject(mMainComponent.sampleDisplayUseCase());
+        mMainComponent.inject(mMainComponent.partnerBroadcastUseCase());
         mContext = appComponent.context();
-
-        // setup recycler view
-        mRecyclerView = findViewById(R.id.gizmo_list); // TODO: Remove for Butterknife
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mRecyclerView.setAdapter(mAdapter);
-
-        /*
-         * Use this setting to improve performance if you know that changes in content do not
-         * change the child layout size in the RecyclerView
-         */
-        mRecyclerView.setHasFixedSize(true);
     }
 
     @Override
@@ -105,9 +76,10 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
         int id = item.getItemId();
         final Intent intent;
 
+        /*
         switch (id) {
             case R.id.action_about:
-                intent = new Intent(MainActivity.this, AboutActivity.class);
+                intent = new Intent(this, AboutActivity.class);
                 startActivity(intent);
                 break;
             case R.id.action_settings:
@@ -119,13 +91,19 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
             default:
                 break;
         }
+        */
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void showGizmos(List<GizmoUiModel> items) {
-        mAdapter.addItems(items);
+    public void onBroadcastUpdate(boolean isBroadcasting) {
+
+    }
+
+    @Override
+    public Context context() {
+        return mContext;
     }
 
     @Override
@@ -152,11 +130,6 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
     public void showError(String message) {
         Timber.e(message);
         showMessage(message);
-    }
-
-    @Override
-    public Context context() {
-        return mContext;
     }
 
     @Override

@@ -41,7 +41,7 @@ public class NearbyPartnerTransmitter extends AbstractNearbyPartnerEmitter {
 
             if (mPartners.size() == 0) {
                 // Another device within range, begin publishing
-                publish(PartnerMessage.Mode.PING);
+                publish();
             }
 
             Partner partner = NearbyUtils.toPartnerModel(message);
@@ -139,5 +139,10 @@ public class NearbyPartnerTransmitter extends AbstractNearbyPartnerEmitter {
         } else if (!mPartners.contains(uuid)) {
             mPartners.add(uuid);
         }
+    }
+
+    @Override
+    protected PartnerMessage.Mode getPublishMode() {
+        return PartnerMessage.Mode.PING;
     }
 }

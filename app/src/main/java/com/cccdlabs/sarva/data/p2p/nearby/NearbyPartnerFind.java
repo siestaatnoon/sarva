@@ -48,12 +48,12 @@ public class NearbyPartnerFind extends AbstractNearbyPartnerEmitter {
 
     public NearbyPartnerFind(@NonNull Activity activity, @NonNull PartnerRepository repository) {
         super(activity, repository);
-        publish(PartnerMessage.Mode.PAIR);
+        publish();
     }
 
     public NearbyPartnerFind(@NonNull Context context, @NonNull PartnerRepository repository) {
         super(context, repository);
-        publish(PartnerMessage.Mode.PAIR);
+        publish();
     }
 
     @Override
@@ -61,5 +61,10 @@ public class NearbyPartnerFind extends AbstractNearbyPartnerEmitter {
         return messageListener == null
             ? new PartnerAddMessageListener(emitter)
             : messageListener;
+    }
+
+    @Override
+    protected PartnerMessage.Mode getPublishMode() {
+        return PartnerMessage.Mode.PAIR;
     }
 }

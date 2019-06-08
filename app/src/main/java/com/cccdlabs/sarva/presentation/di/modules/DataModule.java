@@ -3,18 +3,9 @@ package com.cccdlabs.sarva.presentation.di.modules;
 import android.content.Context;
 
 import com.cccdlabs.sarva.data.mappers.partners.PartnerMapper;
-import com.cccdlabs.sarva.data.mappers.sample.DoodadMapper;
-import com.cccdlabs.sarva.data.mappers.sample.GizmoMapper;
-import com.cccdlabs.sarva.data.mappers.sample.WidgetMapper;
 import com.cccdlabs.sarva.data.network.retrofit.RestClient;
 import com.cccdlabs.sarva.data.repository.partners.PartnerRepository;
-import com.cccdlabs.sarva.data.repository.sample.DoodadRepository;
-import com.cccdlabs.sarva.data.repository.sample.GizmoRepository;
-import com.cccdlabs.sarva.data.repository.sample.WidgetRepository;
 import com.cccdlabs.sarva.data.storage.dao.partners.PartnerDao;
-import com.cccdlabs.sarva.data.storage.dao.sample.DoodadDao;
-import com.cccdlabs.sarva.data.storage.dao.sample.GizmoDao;
-import com.cccdlabs.sarva.data.storage.dao.sample.WidgetDao;
 import com.cccdlabs.sarva.data.storage.database.AppDatabase;
 
 import javax.inject.Singleton;
@@ -25,9 +16,9 @@ import dagger.Provides;
 @Module
 public class DataModule {
 
-    AppDatabase database;
-    String apiBaseUrl;
-    boolean refreshInstance;
+    private AppDatabase database;
+    private String apiBaseUrl;
+    private boolean refreshInstance;
 
     public DataModule(Context context) {
         this(context, null, false, false);
@@ -73,45 +64,5 @@ public class DataModule {
 
     @Provides @Singleton PartnerDao providePartnerDao() {
         return database.partnerDao();
-    }
-
-
-    /* SAMPLE USAGE BELOW */
-
-
-    @Provides @Singleton GizmoRepository provideGizmoRepository() {
-        return new GizmoRepository();
-    }
-
-    @Provides @Singleton GizmoMapper provideGizmoMapper() {
-        return new GizmoMapper();
-    }
-
-    @Provides @Singleton GizmoDao provideGizmoDao() {
-        return database.gizmoDao();
-    }
-
-    @Provides @Singleton WidgetRepository provideWidgetRepository() {
-        return new WidgetRepository();
-    }
-
-    @Provides @Singleton WidgetMapper provideWidgetMapper() {
-        return new WidgetMapper();
-    }
-
-    @Provides @Singleton WidgetDao provideWidgetDao() {
-        return database.widgetDao();
-    }
-
-    @Provides @Singleton DoodadRepository provideDoodadRepository() {
-        return new DoodadRepository();
-    }
-
-    @Provides @Singleton DoodadMapper provideDoodadMapper() {
-        return new DoodadMapper();
-    }
-
-    @Provides @Singleton DoodadDao provideDoodadDao() {
-        return database.doodadDao();
     }
 }

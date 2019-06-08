@@ -61,7 +61,12 @@ public class PartnerMessage {
         /**
          * Type used for notifying other devices that device in search mode.
          */
-        SEARCH("search");
+        SEARCH("search"),
+
+        /**
+         * Default type.
+         */
+        DEFAULT("ping");
 
         private final String value;
 

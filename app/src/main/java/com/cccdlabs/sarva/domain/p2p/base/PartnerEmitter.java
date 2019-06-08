@@ -20,4 +20,15 @@ public interface PartnerEmitter {
      * @return The RxJava Flowable
      */
     Flowable<PartnerResult> getPartnerEmitter();
+
+    /**
+     * Pauses the p2p connection temporarily releasing resources
+     * (e.g. in the event of an onPause() somewhere).
+     */
+    void pauseEmitter();
+
+    /**
+     * Resumes the p2p connection (e.g. in the event of an onResume() somewhere).
+     */
+    void resumeEmitter();
 }

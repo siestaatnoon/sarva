@@ -1,21 +1,16 @@
 package com.cccdlabs.sarva.data.storage.database;
 
+import android.content.Context;
+
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
-import android.content.Context;
 
 import com.cccdlabs.sarva.data.entity.partners.PartnerEntity;
-import com.cccdlabs.sarva.data.entity.sample.DoodadEntity;
-import com.cccdlabs.sarva.data.entity.sample.GizmoEntity;
-import com.cccdlabs.sarva.data.entity.sample.WidgetEntity;
 import com.cccdlabs.sarva.data.storage.converters.ByteArrayConverter;
 import com.cccdlabs.sarva.data.storage.converters.DateConverter;
 import com.cccdlabs.sarva.data.storage.dao.partners.PartnerDao;
-import com.cccdlabs.sarva.data.storage.dao.sample.GizmoDao;
-import com.cccdlabs.sarva.data.storage.dao.sample.DoodadDao;
-import com.cccdlabs.sarva.data.storage.dao.sample.WidgetDao;
 import com.cccdlabs.sarva.data.storage.utils.DatabaseUtils;
 
 /**
@@ -27,10 +22,7 @@ import com.cccdlabs.sarva.data.storage.utils.DatabaseUtils;
  */
 @Database(
         entities = {
-                PartnerEntity.class,
-                GizmoEntity.class,
-                WidgetEntity.class,
-                DoodadEntity.class
+                PartnerEntity.class
         },
         version = 1
 )
@@ -63,14 +55,6 @@ public abstract class AppDatabase extends RoomDatabase {
      * @return The PartnerDao instance
      */
     abstract public PartnerDao partnerDao();
-
-    // TEST USE BELOW
-
-    abstract public WidgetDao widgetDao();
-
-    abstract public GizmoDao gizmoDao();
-
-    abstract public DoodadDao doodadDao();
 
     /**
      * Returns a singleton instance of the production {@link Room} database.

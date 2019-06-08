@@ -25,45 +25,15 @@
             android:name="com.google.android.nearby.messages.API_KEY"
             android:value="AIzaSyCHpwke96VGJip3LlEBjh6EYU8nluHFmjw" />
 
-        <activity
-            android:name="com.cccdlabs.sarva.sample.SeederActivity"
-            android:parentActivityName="com.cccdlabs.sarva.sample.SeederActivity">
+        <activity android:name="com.cccdlabs.sarva.presentation.ui.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name="com.cccdlabs.sarva.presentation.ui.activities.MainActivity">
-            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="http"
                     android:host="sandbox.oscarrrweb.com" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="com.cccdlabs.sarva.presentation.ui.activities.SettingsActivity"
-            android:label="@string/title_settings"
-            android:parentActivityName="com.cccdlabs.sarva.presentation.ui.activities.MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.cccdlabs.sarva.presentation.ui.activities.MainActivity" />
-        </activity>
-
-        <activity
-            android:name="com.cccdlabs.sarva.presentation.ui.activities.AboutActivity"
-            android:label="@string/title_about"
-            android:parentActivityName="com.cccdlabs.sarva.presentation.ui.activities.MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.cccdlabs.sarva.presentation.ui.activities.MainActivity" />
-            <intent-filter>
-                <action android:name="android.intent.action.SENDTO" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 

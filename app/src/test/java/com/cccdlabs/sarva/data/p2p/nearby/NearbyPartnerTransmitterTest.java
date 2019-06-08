@@ -278,7 +278,36 @@ public class NearbyPartnerTransmitterTest {
     }
 
     @Test
-    public void testOnPermissionChangedFalseStopsPublishing() throws Throwable {
+    public void testPauseStopsPubSubAndResumeStartsPubSubAgain() throws Throwable {
+        TestSubscriber<PartnerResult> subscriber = mNearby.getPartnerEmitter().test();
+
+        // First make sure IS NOT publishing but is subscribing
+        assertFalse("Nearby client is publishing before pauseEmitter()", mClient.isPublishing());
+        assertFalse(OBJECT_NAME + " is publishing before pauseEmitter()", mNearby.isPublishing());
+        assertTrue("Nearby client is not subscribing before pauseEmitter()", mClient.isSubscribing());
+        assertTrue(OBJECT_NAME + " is not subscribing before pauseEmitter()", mNearby.isSubscribing());
+
+        mNearby.pauseEmitter();
+
+        assertFalse("Nearby client is publishing after pauseEmitter()", mClient.isPublishing());
+        assertFalse("Nearby client is subscribing after pauseEmitter()", mClient.isSubscribing());
+        assertFalse(OBJECT_NAME + " is publishing after pauseEmitter()", mNearby.isPublishing());
+        assertFalse(OBJECT_NAME + " is subscribing after pauseEmitter()", mNearby.isSubscribing());
+
+        mNearby.resumeEmitter();
+
+        // Make sure IS STILL NOT publishing but is subscribing again
+        assertFalse("Nearby client is publishing after resumeEmitter()", mClient.isPublishing());
+        assertFalse(OBJECT_NAME + " is publishing after resumeEmitter()", mNearby.isPublishing());
+        assertTrue("Nearby client is not subscribing after resumeEmitter()", mClient.isSubscribing());
+        assertTrue(OBJECT_NAME + " is not subscribing after resumeEmitter()", mNearby.isSubscribing());
+
+        subscriber.assertNoErrors();
+        subscriber.dispose();
+    }
+
+    @Test
+    public void testOnPermissionChangedFalseStopsPubSub() throws Throwable {
         // First need to trigger onFound() to initialize publishing, but only one time
         List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
         messages = messages.subList(0, 1);
@@ -287,8 +316,10 @@ public class NearbyPartnerTransmitterTest {
         mClient.mockMessageOnFound(messages);
         mClient.mockStatusCallbackOnPermissionChanged(false);
 
-        assertFalse("Nearby client is not publishing", mClient.isPublishing());
-        assertFalse(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+        assertFalse("Nearby client is publishing", mClient.isPublishing());
+        assertFalse("Nearby client is subscribing", mClient.isSubscribing());
+        assertFalse(OBJECT_NAME + " is publishing", mNearby.isPublishing());
+        assertFalse(OBJECT_NAME + " is subscribing", mNearby.isSubscribing());
         verify(subscriberSpy, times(1)).onNext(any(PartnerResult.class));
         verify(subscriberSpy, times(1)).onError(any(PermissionException.class));
 
@@ -308,7 +339,9 @@ public class NearbyPartnerTransmitterTest {
 
         // need to test just one message received
         assertTrue("Nearby client is not publishing", mClient.isPublishing());
+        assertTrue("Nearby client is not subscribing", mClient.isSubscribing());
         assertTrue(OBJECT_NAME + " is not publishing", mNearby.isPublishing());
+        assertTrue(OBJECT_NAME + " is not subscribing", mNearby.isSubscribing());
         verify(subscriberSpy, times(1)).onNext(any(PartnerResult.class));
         verify(subscriberSpy, times(0)).onError(any(Exception.class));
 
