@@ -13,13 +13,12 @@ import com.cccdlabs.sarva.presentation.di.HasComponent;
 import com.cccdlabs.sarva.presentation.di.components.AppComponent;
 import com.cccdlabs.sarva.presentation.di.components.DaggerMainComponent;
 import com.cccdlabs.sarva.presentation.di.components.MainComponent;
+import com.cccdlabs.sarva.presentation.di.modules.P2pModule;
 import com.cccdlabs.sarva.presentation.presenters.MainPresenter;
 import com.cccdlabs.sarva.presentation.ui.activities.base.BaseAppCompatActivity;
 import com.cccdlabs.sarva.presentation.views.MainView;
 
 import javax.inject.Inject;
-
-import timber.log.Timber;
 
 public class MainActivity extends BaseAppCompatActivity implements MainView, HasComponent<MainComponent> {
 
@@ -40,12 +39,11 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
 
         mMainComponent = DaggerMainComponent.builder()
                 .appComponent(appComponent)
+                .p2pModule(new P2pModule(this, appComponent.partnerRepository()))
                 .activityModule(getActivityModule())
                 .build();
-
         mMainComponent.inject(this);
         mMainComponent.inject(mPresenter);
-        mMainComponent.inject(mMainComponent.partnerBroadcastUseCase());
         mContext = appComponent.context();
     }
 
@@ -59,6 +57,18 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
     protected void onResume() {
         super.onResume();
         mPresenter.resume();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mPresenter.stop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPresenter.destroy();
     }
 
     @Override
@@ -107,6 +117,11 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
     }
 
     @Override
+    public MainComponent getComponent() {
+        return mMainComponent;
+    }
+
+    @Override
     public void showLoading() {
 
     }
@@ -128,13 +143,7 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
 
     @Override
     public void showError(String message) {
-        Timber.e(message);
         showMessage(message);
-    }
-
-    @Override
-    public MainComponent getComponent() {
-        return mMainComponent;
     }
 
     protected void showMessage(String message) {

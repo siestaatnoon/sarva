@@ -54,14 +54,6 @@ public class DataModule {
         return RestClient.getInstance(apiBaseUrl, refreshInstance);
     }
 
-    @Provides @Singleton PartnerRepository providePartnerRepository() {
-        return new PartnerRepository();
-    }
-
-    @Provides @Singleton PartnerMapper providePartnerMapper() {
-        return new PartnerMapper();
-    }
-
     @Provides @Singleton PartnerDao providePartnerDao() {
         return database.partnerDao();
     }

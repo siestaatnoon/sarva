@@ -2,15 +2,26 @@ package com.cccdlabs.sarva.domain.interactors.partners;
 
 import androidx.annotation.NonNull;
 
+import com.cccdlabs.sarva.data.p2p.nearby.NearbyPartnerTransmitter;
 import com.cccdlabs.sarva.domain.interactors.partners.base.AbstractPartnerUseCase;
-import com.cccdlabs.sarva.domain.p2p.base.PartnerEmitter;
 
 import javax.inject.Inject;
 
+/**
+ * {@link com.cccdlabs.sarva.domain.interactors.base.UseCase} to broadcast and receive P2P
+ * info to and from other devices by emitting to other devices that this device is
+ * within proximity in search mode.
+ *
+ * @author Johnny Spence
+ * @version 1.0.0
+ */
 public class PartnerTransmitterUseCase extends AbstractPartnerUseCase {
 
+    /**
+     * {@inheritDoc}
+     */
     @Inject
-    public PartnerTransmitterUseCase(@NonNull PartnerEmitter emitter) {
+    public PartnerTransmitterUseCase(@NonNull NearbyPartnerTransmitter emitter) {
         super(emitter);
     }
 }

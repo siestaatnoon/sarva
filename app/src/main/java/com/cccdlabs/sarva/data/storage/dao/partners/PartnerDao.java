@@ -46,7 +46,8 @@ abstract public class PartnerDao implements EntityDao<PartnerEntity> {
     abstract public PartnerEntity fromUuid(String uuid);
 
     /**
-     * Performs a SELECT retrieving all rows.
+     * Performs a SELECT retrieving all rows. Note that results are sorted by active/inactive
+     * then by username.
      *
      * @return The {@link List} of PartnerEntity objects
      */
@@ -103,5 +104,5 @@ abstract public class PartnerDao implements EntityDao<PartnerEntity> {
      * @return          The number of rows updated
      */
     @Query("UPDATE partners SET updated_at=:dateTime WHERE uuid=:uuid")
-    abstract public int setUpdated(String uuid, String dateTime);
+    abstract public int setUpdatedAt(String uuid, String dateTime);
 }

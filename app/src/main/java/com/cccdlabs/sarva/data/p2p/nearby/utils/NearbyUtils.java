@@ -5,6 +5,12 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 
+import com.cccdlabs.sarva.data.Constants;
+import com.cccdlabs.sarva.data.entity.base.Entity;
+import com.cccdlabs.sarva.data.settings.GeneralSettingsManager;
+import com.cccdlabs.sarva.data.utils.DateUtils;
+import com.cccdlabs.sarva.domain.model.partners.Partner;
+import com.cccdlabs.sarva.domain.model.partners.PartnerMessage;
 import com.google.android.gms.nearby.messages.Message;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,12 +19,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import com.cccdlabs.sarva.data.Constants;
-import com.cccdlabs.sarva.data.entity.base.Entity;
-import com.cccdlabs.sarva.data.settings.GeneralSettingsManager;
-import com.cccdlabs.sarva.data.utils.DateUtils;
-import com.cccdlabs.sarva.domain.model.partners.Partner;
-import com.cccdlabs.sarva.domain.model.partners.PartnerMessage;
 
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;

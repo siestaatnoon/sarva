@@ -1,6 +1,5 @@
 package com.cccdlabs.sarva.presentation.di.components;
 
-import com.cccdlabs.sarva.data.p2p.nearby.NearbyPartnerBroadcast;
 import com.cccdlabs.sarva.domain.interactors.partners.PartnerBroadcastUseCase;
 import com.cccdlabs.sarva.presentation.di.PerActivity;
 import com.cccdlabs.sarva.presentation.di.modules.ActivityModule;
@@ -15,13 +14,11 @@ import dagger.Component;
 @Component(dependencies = {AppComponent.class}, modules = {ActivityModule.class, P2pModule.class, MainModule.class})
 public interface MainComponent extends ActivityComponent {
 
-    PartnerBroadcastUseCase partnerBroadcastUseCase();
+    MainPresenter mainPresenter();
 
-    NearbyPartnerBroadcast nearbyPartnerBroadcast();
+    PartnerBroadcastUseCase partnerBroadcastUseCase();
 
     void inject(MainActivity mainActivity);
 
     void inject(MainPresenter mainPresenter);
-
-    void inject(PartnerBroadcastUseCase useCase);
 }

@@ -4,7 +4,6 @@ import com.cccdlabs.sarva.presentation.di.PerActivity;
 import com.cccdlabs.sarva.presentation.di.modules.TestActivityModule;
 import com.cccdlabs.sarva.presentation.di.modules.TestMainModule;
 import com.cccdlabs.sarva.presentation.di.modules.TestP2pModule;
-import com.cccdlabs.sarva.presentation.presenters.MainPresenter;
 
 import dagger.Component;
 
@@ -19,6 +18,4 @@ import dagger.Component;
                 TestMainModule.class
         }
 )
-public interface TestMainComponent extends MainComponent {
-    MainPresenter mainPresenter();
-}
+public interface TestMainComponent extends MainComponent {}

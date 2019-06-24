@@ -26,6 +26,11 @@ public class Partner extends Model {
     private boolean isActive;
 
     /**
+     * True if user is detected on another device. False otherwise.
+     */
+    private boolean isEmitting;
+
+    /**
      * Distance a user is (Meters) from this device in search mode.
      */
     private double distance;
@@ -98,6 +103,24 @@ public class Partner extends Model {
      */
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    /**
+     * Returns True if user is detected on another device. False otherwise.
+     *
+     * @return True if user is detected on another device, false if not
+     */
+    public boolean isEmitting() {
+        return isEmitting;
+    }
+
+    /**
+     * Sets true or false if user is detected on another device.
+     *
+     * @param emitting True if user is detected on another device
+     */
+    public void setEmitting(boolean emitting) {
+        isEmitting = emitting;
     }
 
     /**

@@ -38,7 +38,7 @@ abstract public class AbstractPresenter<M> implements Presenter {
      *
      * @return The respository
      */
-    protected Repository<M> getRepository() {
+    public Repository<M> getRepository() {
         return mRepository;
     }
 
@@ -47,7 +47,7 @@ abstract public class AbstractPresenter<M> implements Presenter {
      *
      * @return The view
      */
-    protected BaseView getView() {
+    public BaseView getView() {
         return mView;
     }
 }

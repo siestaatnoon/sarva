@@ -2,15 +2,18 @@ package com.cccdlabs.sarva.presentation.exception;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.cccdlabs.sarva.R;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PermissionException;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PublishExpiredException;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.SubscribeExpiredException;
 import com.cccdlabs.sarva.domain.network.base.ApiError;
 import com.cccdlabs.sarva.domain.network.exception.NetworkConnectionException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryDeleteException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryInsertException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryQueryException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryUpdateException;
-
-import androidx.annotation.NonNull;
 
 /**
  * Class to generate a user-friendly error message based on {@link Exception} type.
@@ -36,8 +39,15 @@ public final class ErrorMessageFactory {
 
         boolean hasParam = strParam != null && !strParam.equals("");
         int resId = R.string.error_unknown;
+
         if (throwable instanceof NetworkConnectionException) {
             resId = R.string.error_network_connection;
+        } else if (throwable instanceof PermissionException) {
+            resId = R.string.error_nearby_permission;
+        } else if (throwable instanceof PublishExpiredException) {
+            resId = R.string.error_nearby_publishing;
+        } else if (throwable instanceof SubscribeExpiredException) {
+            resId = R.string.error_nearby_subscribing;
         } else if (throwable instanceof RepositoryInsertException) {
             resId = hasParam
                     ? R.string.error_respository_insert

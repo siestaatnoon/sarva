@@ -12,6 +12,8 @@ import com.cccdlabs.sarva.domain.repository.exception.RepositoryQueryException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryUpdateException;
 import com.cccdlabs.sarva.domain.repository.partners.PartnerRepo;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 /**
@@ -30,6 +32,22 @@ public class PartnerRepository extends AbstractRepository<PartnerEntity, Partner
      */
     @Inject
     public PartnerRepository() {}
+
+    /**
+     * Returns a list of {@link Partner} objects marked active in the database.
+     *
+     * @return  List<T> All table rows as POJO objects
+     * @throws  RepositoryQueryException if an SQL error occurs in the SELECT query
+     */
+    @Override
+    public List<Partner> getAllActive() throws RepositoryQueryException {
+        try {
+            List<PartnerEntity> entities = getDao().getActive();
+            return getMapper().toDomainModel(entities);
+        } catch (SQLiteException e) {
+            throw new RepositoryQueryException(e);
+        }
+    }
 
     /**
      * Returns true if partner exists from given UUID.

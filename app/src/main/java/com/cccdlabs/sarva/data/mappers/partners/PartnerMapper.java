@@ -7,8 +7,29 @@ import com.cccdlabs.sarva.domain.model.partners.Partner;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+/**
+ * Converts {@link Partner} to and from {@link PartnerEntity} model objects. Converts single
+ * objects or {@link List} of objects to and from the model objects of each package.
+ *
+ * @author Johnny Spence
+ * @version 1.0.0
+ */
 public class PartnerMapper extends EntityMapper<PartnerEntity, Partner> {
 
+    /**
+     * Constructor. Annotated with {@link Inject} for use with Dagger 2 dependency injection.
+     */
+    @Inject
+    public PartnerMapper() {}
+
+    /**
+     * Converts an {@link Partner} subclass to an {@link PartnerEntity} subclass.
+     *
+     * @param domainModel   The Partner model
+     * @return              The converted PartnerEntity model
+     */
     @Override
     public PartnerEntity fromDomainModel(Partner domainModel) {
         if (domainModel == null) {
@@ -20,6 +41,7 @@ public class PartnerMapper extends EntityMapper<PartnerEntity, Partner> {
         entity.setUsername(domainModel.getUsername());
         entity.setDeviceName(domainModel.getDeviceName());
         entity.setActive(domainModel.isActive());
+        entity.setEmitting(domainModel.isEmitting());
         entity.setDistance(domainModel.getDistance());
         entity.setAccuracy(domainModel.getAccuracy());
         entity.setRssi(domainModel.getRssi());
@@ -28,6 +50,13 @@ public class PartnerMapper extends EntityMapper<PartnerEntity, Partner> {
 
     }
 
+    /**
+     * Converts a {@link List} of subclassed {@link Partner} to a List of subclassed
+     * {@link PartnerEntity}.
+     *
+     * @param domainModels  The List of Partner models
+     * @return              The converted List of PartnerEntity models
+     */
     @Override
     public List<PartnerEntity> fromDomainModel(List<Partner> domainModels) {
         if (domainModels == null) {
@@ -41,6 +70,12 @@ public class PartnerMapper extends EntityMapper<PartnerEntity, Partner> {
         return entityList;
     }
 
+    /**
+     * Converts an {@link PartnerEntity} subclass to an {@link Partner} subclass.
+     *
+     * @param entity   The PartnerEntity model
+     * @return         The converted Partner model
+     */
     @Override
     public Partner toDomainModel(PartnerEntity entity) {
         if (entity == null) {
@@ -52,6 +87,7 @@ public class PartnerMapper extends EntityMapper<PartnerEntity, Partner> {
         model.setUsername(entity.getUsername());
         model.setDeviceName(entity.getDeviceName());
         model.setActive(entity.isActive());
+        model.setEmitting(entity.isEmitting());
         model.setDistance(entity.getDistance());
         model.setAccuracy(entity.getAccuracy());
         model.setRssi(entity.getRssi());
@@ -59,6 +95,13 @@ public class PartnerMapper extends EntityMapper<PartnerEntity, Partner> {
         return model;
     }
 
+    /**
+     * Converts a {@link List} of subclassed {@link PartnerEntity} to a List of subclassed
+     * {@link Partner}.
+     *
+     * @param entities  The List of PartnerEntity models
+     * @return          The converted List of Partner package models
+     */
     @Override
     public List<Partner> toDomainModel(List<PartnerEntity> entities) {
         if (entities == null) {

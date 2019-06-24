@@ -5,7 +5,7 @@ import com.cccdlabs.sarva.domain.model.partners.PartnerResult;
 import io.reactivex.Flowable;
 
 /**
- * Abstraction for a peer-to-peer connection to emit {@link PartnerResult} objects
+ * Abstraction for a peer-to-peer (P2P) connection to emit {@link PartnerResult} objects
  * in the <code>p2p</code> package.
  *
  * @author Johnny Spence

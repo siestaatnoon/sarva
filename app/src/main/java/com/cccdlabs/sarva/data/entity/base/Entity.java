@@ -2,6 +2,12 @@ package com.cccdlabs.sarva.data.entity.base;
 
 import android.util.Base64;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+import com.cccdlabs.sarva.data.utils.DateUtils;
+import com.cccdlabs.sarva.data.utils.UuidUtils;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.FieldNamingPolicy;
@@ -20,8 +26,6 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
-import com.cccdlabs.sarva.data.utils.DateUtils;
-import com.cccdlabs.sarva.data.utils.UuidUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -30,9 +34,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
 import timber.log.Timber;
 
 /**

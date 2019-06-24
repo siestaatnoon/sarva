@@ -20,6 +20,11 @@ public class PartnerUiModel extends UiModel {
     private boolean isActive;
 
     /**
+     * True if user is detected on another device. False otherwise.
+     */
+    private boolean isEmitting;
+
+    /**
      * Extra data field to store distance a user is (Meters) from this device in search mode.
      * Not a database field or serialized for data transfer.
      */
@@ -96,6 +101,24 @@ public class PartnerUiModel extends UiModel {
      */
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    /**
+     * Returns True if user is detected on another device. False otherwise.
+     *
+     * @return True if user is detected on another device, false if not
+     */
+    public boolean isEmitting() {
+        return isEmitting;
+    }
+
+    /**
+     * Sets true or false if user is detected on another device.
+     *
+     * @param emitting True if user is detected on another device
+     */
+    public void setEmitting(boolean emitting) {
+        isEmitting = emitting;
     }
 
     /**

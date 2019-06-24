@@ -5,9 +5,10 @@ package com.cccdlabs.sarva.presentation.presenters.base;
  * <code>data</code> package of the application.
  *
  * @author Johnny Spence
- *  * @version 1.0.0
+ * @version 1.0.0
  */
 public interface Presenter {
+
     /**
      * Method that control the lifecycle of the view. It should be called in the view's
      * (Activity or Fragment) onResume() method.

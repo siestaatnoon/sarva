@@ -2,10 +2,15 @@ package com.cccdlabs.sarva.presentation.exception;
 
 import android.content.Context;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import com.cccdlabs.sarva.R;
-import com.cccdlabs.sarva.domain.network.exception.NetworkConnectionException;
 import com.cccdlabs.sarva.data.network.retrofit.RestException;
 import com.cccdlabs.sarva.data.network.retrofit.RestResponse;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PermissionException;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PublishExpiredException;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.SubscribeExpiredException;
+import com.cccdlabs.sarva.domain.network.exception.NetworkConnectionException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryDeleteException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryInsertException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryQueryException;
@@ -20,7 +25,6 @@ import org.robolectric.RobolectricTestRunner;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
-import androidx.test.core.app.ApplicationProvider;
 import io.reactivex.annotations.Nullable;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
@@ -63,6 +67,27 @@ public class ErrorMessageFactoryTest {
         NetworkConnectionException exception = new NetworkConnectionException();
         String message = ErrorMessageFactory.create(context, exception);
         assertEquals("Exception messages not equal", message, context.getString(R.string.error_network_connection));
+    }
+
+    @Test
+    public void shouldReturnPermissionExceptionMessage() throws Exception {
+        PermissionException exception = new PermissionException();
+        String message = ErrorMessageFactory.create(context, exception);
+        assertEquals("Exception messages not equal", message, context.getString(R.string.error_nearby_permission));
+    }
+
+    @Test
+    public void shouldReturnPublishExpiredExceptionMessage() throws Exception {
+        PublishExpiredException exception = new PublishExpiredException();
+        String message = ErrorMessageFactory.create(context, exception);
+        assertEquals("Exception messages not equal", message, context.getString(R.string.error_nearby_publishing));
+    }
+
+    @Test
+    public void shouldReturnSubscribeExpiredExceptionnMessage() throws Exception {
+        SubscribeExpiredException exception = new SubscribeExpiredException();
+        String message = ErrorMessageFactory.create(context, exception);
+        assertEquals("Exception messages not equal", message, context.getString(R.string.error_nearby_subscribing));
     }
 
     @Test

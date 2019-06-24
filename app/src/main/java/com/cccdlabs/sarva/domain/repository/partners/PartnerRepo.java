@@ -2,7 +2,10 @@ package com.cccdlabs.sarva.domain.repository.partners;
 
 import com.cccdlabs.sarva.domain.model.partners.Partner;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryException;
+import com.cccdlabs.sarva.domain.repository.exception.RepositoryQueryException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryUpdateException;
+
+import java.util.List;
 
 /**
  * Abstraction for database functions specific to the {@link Partner} domain model.
@@ -11,6 +14,14 @@ import com.cccdlabs.sarva.domain.repository.exception.RepositoryUpdateException;
  * @version 1.0.0
  */
 public interface PartnerRepo {
+
+    /**
+     * Returns a list of {@link Partner} objects marked active in the database.
+     *
+     * @return The list of active Partner objects
+     * @throws RepositoryQueryException if an SQL occurs
+     */
+    List<Partner> getAllActive() throws RepositoryQueryException;
 
     /**
      * Inserts a model to the database or updates the database model if it already exists.

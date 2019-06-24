@@ -2,7 +2,6 @@ package com.cccdlabs.sarva.presentation.presenters;
 
 import android.content.Context;
 
-import com.cccdlabs.sarva.data.p2p.nearby.NearbyPartnerBroadcast;
 import com.cccdlabs.sarva.data.repository.partners.PartnerRepository;
 import com.cccdlabs.sarva.domain.executor.ExecutorThread;
 import com.cccdlabs.sarva.domain.executor.MainThread;
@@ -15,29 +14,35 @@ import com.cccdlabs.sarva.presentation.views.MainView;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 public class MainPresenter extends AbstractPresenter<Partner> {
 
     @Inject PartnerBroadcastUseCase mUseCase;
-    @Inject NearbyPartnerBroadcast mEmitter;
     @Inject ExecutorThread mExecutorThread;
     @Inject MainThread mMainThread;
     @Inject Context mContext;
 
     private PresenterDisposableSubscriber<PartnerResult> mSubscriber;
-    private boolean hasStartedPubSub;
+    private boolean hasStartedPublishing;
 
     class PartnerBroadcastSubscriber extends PresenterDisposableSubscriber<PartnerResult> {
 
         private MainView mainView;
 
-        private PartnerBroadcastSubscriber() {
+        PartnerBroadcastSubscriber() {
             super(mContext, MainPresenter.this);
             mainView = (MainView) getView();
         }
 
         @Override
         public void onNext(final PartnerResult result) {
-            mainView.onBroadcastUpdate(result.hasPublished());
+            if (result.hasError()) {
+                Timber.e(result.getException());
+                return;
+            }
+            boolean isPublishing = result.getPublishStatus() == PartnerResult.PublishStatus.PUBLISHING;
+            mainView.onBroadcastUpdate(isPublishing);
         }
 
         @Override
@@ -53,21 +58,27 @@ public class MainPresenter extends AbstractPresenter<Partner> {
         }
     }
 
+    @Inject
     public MainPresenter(final PartnerRepository repository, final MainView view) {
         super(repository, view);
     }
 
     public void startBroadcast() {
+        if (hasStartedPublishing) {
+            return;
+        }
+
         mSubscriber = getPartnerBroadcastSubscriber();
         mUseCase.emit(null)
                 .subscribeOn(mExecutorThread.getScheduler())
                 .observeOn(mMainThread.getScheduler())
+                .onBackpressureBuffer(100)
                 .subscribe(mSubscriber);
-        hasStartedPubSub = true;
+        hasStartedPublishing = true;
     }
 
     public void endBroadcast() {
-        if ( ! mSubscriber.isDisposed()) {
+        if (mSubscriber != null && ! mSubscriber.isDisposed()) {
             mSubscriber.onComplete();
             mSubscriber.dispose();
             mSubscriber = null;
@@ -76,7 +87,7 @@ public class MainPresenter extends AbstractPresenter<Partner> {
 
     @Override
     public void resume() {
-        if (hasStartedPubSub) {
+        if (hasStartedPublishing) {
             mUseCase.resumeEmitterSource();
         } else {
             startBroadcast();
@@ -89,13 +100,16 @@ public class MainPresenter extends AbstractPresenter<Partner> {
     }
 
     @Override
-    public void stop() {
-
-    }
+    public void stop() {}
 
     @Override
     public void destroy() {
         endBroadcast();
+        mUseCase = null;
+        mExecutorThread = null;
+        mMainThread = null;
+        mContext = null;
+
     }
 
     @Override

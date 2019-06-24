@@ -115,6 +115,12 @@ public class NearbyPartnerTransmitterTest {
         );
         final int size = partners.size();
 
+        // need to set isEmitting=true for each Partner
+        // since that is the result after onFound() call
+        for (Partner partner : partners) {
+            partner.setEmitting(true);
+        }
+
         TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
@@ -150,6 +156,12 @@ public class NearbyPartnerTransmitterTest {
         );
         final int size = partners.size();
 
+        // need to set isEmitting=true for each Partner
+        // since that is the result after onFound() call
+        for (Partner partner : partners) {
+            partner.setEmitting(true);
+        }
+
         TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
@@ -182,6 +194,12 @@ public class NearbyPartnerTransmitterTest {
         );
         final int size = partners.size();
 
+        // need to set isEmitting=true for each Partner
+        // since that is the result after onFound() call
+        for (Partner partner : partners) {
+            partner.setEmitting(true);
+        }
+
         TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
@@ -213,6 +231,12 @@ public class NearbyPartnerTransmitterTest {
                 true // DB items are set to active prior to onFound() call
         );
         final int size = partners.size();
+
+        // need to set isEmitting=true for each Partner
+        // since that is the result after onFound() call
+        for (Partner partner : partners) {
+            partner.setEmitting(true);
+        }
 
         TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
@@ -311,7 +335,7 @@ public class NearbyPartnerTransmitterTest {
         // First need to trigger onFound() to initialize publishing, but only one time
         List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
         messages = messages.subList(0, 1);
-        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages, PermissionException.class);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
         mClient.mockMessageOnFound(messages);
         mClient.mockStatusCallbackOnPermissionChanged(false);
@@ -332,7 +356,7 @@ public class NearbyPartnerTransmitterTest {
         // First need to trigger onFound() to initialize publishing, but only one time
         List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
         messages = messages.subList(0, 1);
-        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages, null);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
         mClient.mockMessageOnFound(messages);
         mClient.mockStatusCallbackOnPermissionChanged(true);
@@ -354,7 +378,7 @@ public class NearbyPartnerTransmitterTest {
         // First need to trigger onFound() to initialize publishing, but only one time
         List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
         messages = messages.subList(0, 1);
-        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages, PublishExpiredException.class);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
         mClient.mockMessageOnFound(messages);
         mClient.mockPublishExpired();
@@ -375,7 +399,7 @@ public class NearbyPartnerTransmitterTest {
         // First need to trigger onFound() to initialize publishing, but only one time
         List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
         messages = messages.subList(0, 1);
-        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages, SubscribeExpiredException.class);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
         mClient.mockMessageOnFound(messages);
         mClient.mockSubscribeExpired();
@@ -396,7 +420,7 @@ public class NearbyPartnerTransmitterTest {
         // First need to trigger onFound() to initialize publishing, but only one time
         List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.SEARCH);
         messages = messages.subList(0, 1);
-        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages);
+        TestSubscriber<PartnerResult> subscriberSpy = seedPartnersAndReturnTestSubscriberSpy(messages, null);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
         mClient.mockMessageOnFound(messages);
         subscriberSpy.cancel();
@@ -428,7 +452,7 @@ public class NearbyPartnerTransmitterTest {
 
             @Override
             public void onError(Throwable throwable) {
-                fail("Exception should be passed into onNext(), " + throwable.getMessage());
+                throw fail("Exception should be passed into onNext(), " + throwable.getMessage());
             }
 
             @Override
@@ -466,7 +490,7 @@ public class NearbyPartnerTransmitterTest {
 
             @Override
             public void onError(Throwable throwable) {
-                fail("Exception should be passed into onNext(), " + throwable.getMessage());
+                throw fail("Exception should be passed into onNext(), " + throwable.getMessage());
             }
 
             @Override
@@ -494,7 +518,7 @@ public class NearbyPartnerTransmitterTest {
 
             @Override
             public void onNext(PartnerResult partnerResult) {
-                fail("Exception should be passed into onError()");
+                throw fail("Exception should be passed into onError()");
             }
 
             @Override
@@ -529,7 +553,8 @@ public class NearbyPartnerTransmitterTest {
         mRepository = null;
     }
 
-    private TestSubscriber<PartnerResult> seedPartnersAndReturnTestSubscriberSpy(List<Message> messages) throws Exception {
+    private TestSubscriber<PartnerResult> seedPartnersAndReturnTestSubscriberSpy(List<Message> messages,
+            Class<? extends Throwable> expectedThrowable) throws Exception {
         if (messages == null || messages.size() == 0) {
             throw new IllegalArgumentException("messages parameter cannot be null or empty List");
         }
@@ -543,7 +568,13 @@ public class NearbyPartnerTransmitterTest {
                 true // DB items are set to active prior to any callback
         );
 
-        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
+        // need to set isEmitting=true for each Partner
+        // since that is the result after onFound() call
+        for (Partner partner : partners) {
+            partner.setEmitting(true);
+        }
+
+        TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners, expectedThrowable);
         return spy(subscriberSpy);
     }
 }

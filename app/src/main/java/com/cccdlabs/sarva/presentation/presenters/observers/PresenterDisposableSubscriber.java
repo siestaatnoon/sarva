@@ -8,6 +8,15 @@ import com.cccdlabs.sarva.presentation.presenters.base.Presenter;
 import io.reactivex.subscribers.DisposableSubscriber;
 import timber.log.Timber;
 
+/**
+ * Implementation of an RxJava Subcriber allowing for asynchronous cancellation by an emitter
+ * source.
+ *
+ * @author Johnny Spence
+ * @version 1.0.0
+ * @param <T>   Object type being emitted corresponding {@link io.reactivex.Observable} or
+ *              {@link io.reactivex.Flowable}
+ */
 abstract public class PresenterDisposableSubscriber<T> extends DisposableSubscriber<T> {
 
     /**

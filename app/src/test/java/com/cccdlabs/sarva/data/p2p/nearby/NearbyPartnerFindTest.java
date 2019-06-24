@@ -92,32 +92,6 @@ public class NearbyPartnerFindTest {
     }
 
     @Test
-    public void testSomething() throws Throwable {
-        final NearbyPartnerFind nearbySpy = spy(mNearby);
-        final CompositeDisposable disposables = new CompositeDisposable();
-        TestSubscriber<PartnerResult> subscriber = nearbySpy.getPartnerEmitter().test();
-        disposables.add(subscriber);
-
-        List<Message> messages = TestData.generateMessages(PartnerMessage.Mode.PAIR);
-        mClient.mockMessageCallbackException(new RepositoryException("Test error"), 3);
-        mClient.mockMessageOnFound(messages);
-        //mClient.mockSubscribeExpired();
-
-        subscriber.assertSubscribed();
-        subscriber.assertValueCount(TEST_MESSAGE_COUNT);
-        assertFalse(subscriber.isCancelled());
-        assertFalse(subscriber.isDisposed());
-        assertFalse(subscriber.isTerminated()); // onError or onComplete called
-
-        //mClient.reset();
-        //subscriber.cancel();
-        disposables.clear();
-        assertTrue(subscriber.isCancelled());
-        assertTrue(subscriber.isDisposed());
-        assertFalse(subscriber.isTerminated());
-    }
-
-    @Test
     public void testIsPublishingAndSendingMessage() throws Throwable {
         Message message = mClient.capturePublishMessage();
         PartnerMessage partnerMessage = NearbyUtils.toPartnerMessage(message);
@@ -141,6 +115,12 @@ public class NearbyPartnerFindTest {
                 false // DB items are set to inactive after onFound() call
         );
         final int size = partners.size();
+
+        // need to set isEmitting=true for each Partner
+        // since that is the result after onFound() call
+        for (Partner partner : partners) {
+            partner.setEmitting(true);
+        }
 
         TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
@@ -278,7 +258,7 @@ public class NearbyPartnerFindTest {
 
             @Override
             public void onError(Throwable throwable) {
-                fail("Exception should be passed into onNext(), " + throwable.getMessage());
+                throw fail("Exception should be passed into onNext(), " + throwable.getMessage());
             }
 
             @Override
@@ -316,7 +296,7 @@ public class NearbyPartnerFindTest {
 
             @Override
             public void onError(Throwable throwable) {
-                fail("Exception should be passed into onNext(), " + throwable.getMessage());
+                throw fail("Exception should be passed into onNext(), " + throwable.getMessage());
             }
 
             @Override
@@ -344,7 +324,7 @@ public class NearbyPartnerFindTest {
 
             @Override
             public void onNext(PartnerResult partnerResult) {
-                fail("Exception should be passed into onError()");
+                throw fail("Exception should be passed into onError()");
             }
 
             @Override

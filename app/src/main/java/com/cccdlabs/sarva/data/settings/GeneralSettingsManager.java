@@ -1,6 +1,8 @@
 package com.cccdlabs.sarva.data.settings;
 
 import android.content.Context;
+import android.os.Build;
+
 import androidx.annotation.NonNull;
 
 import com.cccdlabs.sarva.R;
@@ -95,13 +97,21 @@ public class GeneralSettingsManager extends SettingsManager implements GeneralSe
     }
 
     /**
-     * Returns the value of the username setting.
+     * Returns the value of the username setting. If accessed for the first time, and shared
+     * preference does not exist, will generate the username, save it in the preference and
+     * return the value.
      *
      * @return The username value
      */
     @Override
     public String getUsername() {
-        return mSharedPreferences.getString(sKeyUsername, null);
+        String username = mSharedPreferences.getString(sKeyUsername, null);
+        if (username == null) {
+            username = "Unknown " + Build.MANUFACTURER + " User";
+            setUsername(username);
+        }
+
+        return username;
     }
 
     /**

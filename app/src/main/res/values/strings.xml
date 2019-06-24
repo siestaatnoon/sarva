@@ -30,6 +30,9 @@
     <!-- Errors -->
     <string name="error_authentication">Username and/or password invalid</string>
     <string name="error_lockout">User temporarily disabled</string>
+    <string name="error_nearby_permission">Nearby must be enabled on this device to continue use</string>
+    <string name="error_nearby_publishing">This device has stopped transmission to other devices</string>
+    <string name="error_nearby_subscribing">This device has stopped reception of other devices</string>
     <string name="error_network_server">A server error has occurred</string>
     <string name="error_network_timeout">The server connection has timed out</string>
     <string name="error_network_connection">Unable to connect to internet</string>

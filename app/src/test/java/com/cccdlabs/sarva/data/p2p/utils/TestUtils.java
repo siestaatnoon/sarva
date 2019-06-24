@@ -2,14 +2,14 @@ package com.cccdlabs.sarva.data.p2p.utils;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.nearby.messages.BleSignal;
-import com.google.android.gms.nearby.messages.Distance;
-import com.google.android.gms.nearby.messages.Message;
 import com.cccdlabs.sarva.data.p2p.nearby.utils.NearbyUtils;
 import com.cccdlabs.sarva.data.repository.partners.PartnerRepository;
 import com.cccdlabs.sarva.domain.model.partners.Partner;
 import com.cccdlabs.sarva.domain.model.partners.PartnerResult;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryException;
+import com.google.android.gms.nearby.messages.BleSignal;
+import com.google.android.gms.nearby.messages.Distance;
+import com.google.android.gms.nearby.messages.Message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +19,7 @@ import io.reactivex.subscribers.TestSubscriber;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -30,11 +31,19 @@ public final class TestUtils {
 
         final private List<Partner> partners;
         final private int expectedCount;
+        final private Class<? extends Throwable> expectedThrowable;
         private int count = 0;
 
         public TestAssertPartnerResultSubscriber(List<Partner> partners) {
             this.partners = partners;
             expectedCount = partners.size();
+            expectedThrowable = null;
+        }
+
+        public TestAssertPartnerResultSubscriber(List<Partner> partners, Class<? extends Throwable> expectedThrowable) {
+            this.partners = partners;
+            expectedCount = partners.size();
+            this.expectedThrowable = expectedThrowable;
         }
 
         @Override
@@ -53,7 +62,12 @@ public final class TestUtils {
 
         @Override
         public void onError(Throwable throwable) {
-            fail("Unexpected exception thrown: " + throwable.toString());
+            if (expectedThrowable == null) {
+                throw fail("Unexpected exception thrown: " + throwable.toString());
+            } else {
+                boolean areEqual = throwable.getClass() == expectedThrowable;
+                assertTrue("Exception thrown not " + expectedThrowable.getName(), areEqual);
+            }
         }
     }
 
@@ -83,15 +97,24 @@ public final class TestUtils {
         assertEquals(objectName + " distance not equal", expected.getDistance(), result.getDistance(), delta);
         assertEquals(objectName + " RSSI not equal", expected.getRssi(), result.getRssi());
         assertEquals(objectName + " TX power not equal", expected.getTxPower(), result.getTxPower());
-        assertEquals(objectName + " isActive not equal", expected.isActive(), result.isActive());
+        assertEquals(objectName + " isEmitting not equal", expected.isEmitting(), result.isEmitting());
+
+        // NOTE: isActive not utilized within the app so no asserting equal values in tests
+        //
+        //assertEquals(objectName + " isActive not equal", expected.isActive(), result.isActive());
     }
 
     public static TestSubscriber<PartnerResult> getTestAssertPartnerResultSubscriber(List<Partner> partners) {
+        return getTestAssertPartnerResultSubscriber(partners, null);
+    }
+
+    public static TestSubscriber<PartnerResult> getTestAssertPartnerResultSubscriber(List<Partner> partners,
+            Class<? extends Throwable> expectedThrowable) {
         if (partners == null) {
             throw new IllegalArgumentException("partners parameter null");
         }
 
-        return new TestAssertPartnerResultSubscriber(partners);
+        return new TestAssertPartnerResultSubscriber(partners, expectedThrowable);
     }
 
     public static List<Partner> seedAndConvertToPartners(@NonNull PartnerRepository repository, List<Message> messages,

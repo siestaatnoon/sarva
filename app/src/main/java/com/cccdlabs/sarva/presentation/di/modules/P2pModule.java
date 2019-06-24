@@ -16,30 +16,40 @@ import dagger.Provides;
 @Module
 public class P2pModule {
 
-    public P2pModule() {}
+    private Activity activity;
+    private PartnerRepository repository;
+
+    public P2pModule(Activity activity) {
+        this(activity, null);
+    }
+
+    public P2pModule(Activity activity, PartnerRepository repository) {
+        this.activity = activity;
+        this.repository = repository;
+    }
 
     @Provides @PerActivity
-    NearbyPartnerBroadcast provideNearbyPartnerBroadcast(Activity activity) {
+    NearbyPartnerBroadcast provideNearbyPartnerBroadcast() {
         return new NearbyPartnerBroadcast(activity);
     }
 
     @Provides @PerActivity
-    NearbyPartnerCheck provideNearbyPartnerCheck(Activity activity, PartnerRepository repository) {
+    NearbyPartnerCheck provideNearbyPartnerCheck() {
         return new NearbyPartnerCheck(activity, repository);
     }
 
     @Provides @PerActivity
-    NearbyPartnerFind provideNearbyPartnerFind(Activity activity, PartnerRepository repository) {
+    NearbyPartnerFind provideNearbyPartnerFind() {
         return new NearbyPartnerFind(activity, repository);
     }
 
     @Provides @PerActivity
-    NearbyPartnerSearch provideNearbyPartnerSearch(Activity activity, PartnerRepository repository) {
+    NearbyPartnerSearch provideNearbyPartnerSearch() {
         return new NearbyPartnerSearch(activity, repository);
     }
 
     @Provides @PerActivity
-    NearbyPartnerTransmitter provideNearbyPartnerTransmitter(Activity activity, PartnerRepository repository) {
+    NearbyPartnerTransmitter provideNearbyPartnerTransmitter() {
         return new NearbyPartnerTransmitter(activity, repository);
     }
 }

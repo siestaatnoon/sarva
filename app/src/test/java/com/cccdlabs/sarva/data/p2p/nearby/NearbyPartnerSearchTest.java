@@ -117,6 +117,12 @@ public class NearbyPartnerSearchTest {
         );
         final int size = partners.size();
 
+        // need to set isEmitting=true for each Partner
+        // since that is the result after onFound() call
+        for (Partner partner : partners) {
+            partner.setEmitting(true);
+        }
+
         TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
@@ -150,6 +156,12 @@ public class NearbyPartnerSearchTest {
         );
         final int size = partners.size();
 
+        // need to set isEmitting=true for each Partner
+        // since that is the result after onFound() call
+        for (Partner partner : partners) {
+            partner.setEmitting(true);
+        }
+
         TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
         mNearby.getPartnerEmitter().subscribe(subscriberSpy);
@@ -182,6 +194,12 @@ public class NearbyPartnerSearchTest {
                 true // DB items are set to active prior to onFound() call
         );
         final int size = partners.size();
+
+        // need to set isEmitting=true for each Partner
+        // since that is the result after onFound() call
+        for (Partner partner : partners) {
+            partner.setEmitting(true);
+        }
 
         TestSubscriber<PartnerResult> subscriberSpy = TestUtils.getTestAssertPartnerResultSubscriber(partners);
         subscriberSpy = spy(subscriberSpy);
@@ -357,7 +375,7 @@ public class NearbyPartnerSearchTest {
 
             @Override
             public void onError(Throwable throwable) {
-                fail("Exception should be passed into onNext(), " + throwable.getMessage());
+                throw fail("Exception should be passed into onNext(), " + throwable.getMessage());
             }
 
             @Override
@@ -395,7 +413,7 @@ public class NearbyPartnerSearchTest {
 
             @Override
             public void onError(Throwable throwable) {
-                fail("Exception should be passed into onNext(), " + throwable.getMessage());
+                throw fail("Exception should be passed into onNext(), " + throwable.getMessage());
             }
 
             @Override
@@ -423,7 +441,7 @@ public class NearbyPartnerSearchTest {
 
             @Override
             public void onNext(PartnerResult partnerResult) {
-                fail("Exception should be passed into onError()");
+                throw fail("Exception should be passed into onError()");
             }
 
             @Override
