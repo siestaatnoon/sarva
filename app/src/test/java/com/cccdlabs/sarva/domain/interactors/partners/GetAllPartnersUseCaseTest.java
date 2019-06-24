@@ -99,7 +99,6 @@ public class GetAllPartnersUseCaseTest {
                 .build();
         mDb = dataComponent.appDatabase();
         PartnerRepository repository = dataComponent.partnerRepository();
-        dataComponent.inject(repository);
         mRepositorySpy = spy(repository);
         mUseCase = new GetAllPartnersUseCase(mRepositorySpy);
         mPartnerList = new ArrayList<>();

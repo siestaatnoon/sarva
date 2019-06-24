@@ -34,9 +34,6 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
         setContentView(R.layout.activity_main);
 
         AppComponent appComponent = getAppComponent();
-        appComponent.inject(appComponent.partnerMapper());
-        appComponent.inject(appComponent.partnerRepository());
-
         mMainComponent = DaggerMainComponent.builder()
                 .appComponent(appComponent)
                 .p2pModule(new P2pModule(this, appComponent.partnerRepository()))

@@ -48,8 +48,7 @@ public class PartnerRepositoryTest {
                 .build();
 
         mDb = dataComponent.appDatabase();
-        mRepository = new PartnerRepository();
-        dataComponent.inject(mRepository);
+        mRepository = dataComponent.partnerRepository();
 
         model1 = new Partner();
         model1.setUuid("d4f74431-2f49-4acb-8f81-57c2ed67047a");

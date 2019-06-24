@@ -20,7 +20,7 @@ import com.cccdlabs.sarva.presentation.presenters.observers.PresenterCompletable
 import com.cccdlabs.sarva.presentation.presenters.observers.PresenterDisposableSubscriber;
 import com.cccdlabs.sarva.presentation.presenters.observers.PresenterSingleObserver;
 import com.cccdlabs.sarva.presentation.views.MainView;
-import com.cccdlabs.sarva.presentation.views.PartnerCheckView;
+import com.cccdlabs.sarva.presentation.views.partners.PartnerCheckView;
 
 import java.util.ArrayList;
 import java.util.List;

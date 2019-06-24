@@ -2,9 +2,7 @@ package com.cccdlabs.sarva.presentation.di.modules;
 
 import android.content.Context;
 
-import com.cccdlabs.sarva.data.mappers.partners.PartnerMapper;
 import com.cccdlabs.sarva.data.network.retrofit.RestClient;
-import com.cccdlabs.sarva.data.repository.partners.PartnerRepository;
 import com.cccdlabs.sarva.data.storage.dao.partners.PartnerDao;
 import com.cccdlabs.sarva.data.storage.database.AppDatabase;
 

@@ -1,4 +1,4 @@
-package com.cccdlabs.sarva.presentation.views;
+package com.cccdlabs.sarva.presentation.views.partners;
 
 import com.cccdlabs.sarva.presentation.model.partners.PartnerUiModel;
 import com.cccdlabs.sarva.presentation.views.base.PartnerEmitterView;

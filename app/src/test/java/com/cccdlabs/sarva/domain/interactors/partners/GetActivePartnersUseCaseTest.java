@@ -108,7 +108,6 @@ public class GetActivePartnersUseCaseTest {
                 .build();
         mDb = dataComponent.appDatabase();
         PartnerRepository repository = dataComponent.partnerRepository();
-        dataComponent.inject(repository);
         mRepositorySpy = spy(repository);
         mUseCase = new GetActivePartnersUseCase(mRepositorySpy);
         mPartnerList = new ArrayList<>();

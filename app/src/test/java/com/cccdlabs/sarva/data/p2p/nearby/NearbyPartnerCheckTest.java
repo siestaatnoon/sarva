@@ -85,7 +85,6 @@ public class NearbyPartnerCheckTest {
         mSettings.setUsername(TEST_USERNAME);
 
         mRepository = dataComponent.partnerRepository();
-        dataComponent.inject(mRepository);
         mClient = new MockMessagesClient(context, true);
         mNearby = new MockNearbyPartnerCheck(context, mRepository);
     }
