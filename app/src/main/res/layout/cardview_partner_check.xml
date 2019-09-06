@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardview_partner_check"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="0dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:maxHeight="80dp">
+
+        <ImageView
+            style="@style/state_partner_off"
+            android:id="@+id/iv_user_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="5dp"
+            android:src="@drawable/ic_account_circle_white_24dp"
+            android:contentDescription="@string/image_partner_descr" />
+
+        <TextView
+            android:id="@+id/tv_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="5dp"
+            android:layout_toEndOf="@+id/iv_user_image"
+            android:textSize="14sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/colorWhite"
+            tools:text="Siestaatnoon"
+            android:text="Siestaatnoon" />
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_username"
+            android:layout_alignStart="@+id/tv_username"
+            android:layout_marginTop="0dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/colorWhite"
+            android:alpha=".5"
+            tools:text="Not added on device"
+            android:text="Not added on device" />
+
+        <ImageButton
+            android:id="@+id/btn_partner_add"
+            android:background="@drawable/ic_add_circle_white_24dp"
+            android:adjustViewBounds="true"
+            android:layout_gravity="center"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/iv_checked"
+            android:contentDescription="@string/image_add_partner_descr"
+            android:visibility="gone"/>
+
+        <ImageButton
+            android:id="@+id/btn_partner_delete"
+            android:background="@drawable/ic_remove_circle_white_24dp"
+            android:backgroundTint="@color/colorRed"
+            android:adjustViewBounds="true"
+            android:layout_gravity="center"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/iv_checked"
+            android:contentDescription="@string/image_delete_partner_descr"
+            android:visibility="visible"/>
+
+        <ImageView
+            style="@style/state_partner_on"
+            android:id="@+id/iv_checked"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/ic_check_white_24dp"
+            android:contentDescription="@string/image_partner_status_descr"/>
+
+    </RelativeLayout>
+
+</com.google.android.material.card.MaterialCardView>

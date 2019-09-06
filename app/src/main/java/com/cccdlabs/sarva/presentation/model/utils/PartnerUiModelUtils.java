@@ -5,8 +5,21 @@ import com.cccdlabs.sarva.presentation.model.partners.PartnerUiModel;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility functions for sorting {@link List}s of {@link PartnerUiModel} objects for display.
+ *
+ * @author Johnny Spence
+ * @version 1.0.0
+ */
 final public class PartnerUiModelUtils {
 
+    /**
+     * Sorts a {@link List} of {@link PartnerUiModel} objects by
+     * <code>PartnerUiModel.username</code>.
+     *
+     * @param partners  The List of PartnerUiModel objects
+     * @return          The sorted List
+     */
     public static List<PartnerUiModel> sort(List<PartnerUiModel> partners) {
         if (partners == null || partners.size() > 0) {
             return partners;
@@ -34,6 +47,15 @@ final public class PartnerUiModelUtils {
         return sorted;
     }
 
+    /**
+     * Sorts a {@link List} of {@link PartnerUiModel} objects by
+     * <code>PartnerUiModel.isActive</code> with <code>isActive=true</code> preceding
+     * <code>isActive=false</code>. A secondary sort by <code>PartnerUiModel.username</code>
+     * is done within active and inactive items.
+     *
+     * @param partners  The List of PartnerUiModel objects
+     * @return          The sorted List
+     */
     public static List<PartnerUiModel> sortByActive(List<PartnerUiModel> partners) {
         return sortByActive(partners, false);
     }

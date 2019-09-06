@@ -54,10 +54,6 @@ public class MainPresenterTest {
                 .testDataModule(new TestDataModule(appContext))
                 .build();
 
-        // TODO: add @Inject to PartnerRepository and remove @Provides in DataComponent
-        // DONE
-        // appComponent.inject(appComponent.partnerRepository());
-
         TestMainComponent mainComponent = DaggerTestMainComponent.builder()
                 .testAppComponent(appComponent)
                 .testActivityModule(new TestActivityModule(mMainActivityMock))
@@ -66,7 +62,6 @@ public class MainPresenterTest {
                 .build();
         mainComponent.inject(mMainActivityMock);
         mPresenter = mainComponent.mainPresenter();
-        mainComponent.inject(mPresenter);
         mPartnerBroadcastUseCase = mainComponent.partnerBroadcastUseCase();
     }
 
@@ -191,7 +186,7 @@ public class MainPresenterTest {
     }
 
     @Test
-    public void shouldSubscriberOnNextReturnIsBroadcasting() throws Exception {
+    public void shouldPartnerBroadcastSubscriberOnNextReturnIsBroadcasting() throws Exception {
         List<PartnerResult> partnerResults = new ArrayList<>(2);
         partnerResults.add(new PartnerResult(true));
         partnerResults.add(new PartnerResult(true));
@@ -209,7 +204,7 @@ public class MainPresenterTest {
     }
 
     @Test
-    public void shouldSubscriberOnNextReturnIsNotBroadcasting() throws Exception {
+    public void shouldPartnerBroadcastSubscriberOnNextReturnIsNotBroadcasting() throws Exception {
         List<PartnerResult> partnerResults = new ArrayList<>(2);
         partnerResults.add(new PartnerResult(false));
         partnerResults.add(new PartnerResult(false));
@@ -226,7 +221,7 @@ public class MainPresenterTest {
     }
 
     @Test
-    public void shouldSubscriberOnNextErrorDoNothing() throws Exception {
+    public void shouldPartnerBroadcastSubscriberOnNextErrorDoNothing() throws Exception {
         MainPresenter.PartnerBroadcastSubscriber subscriberSpy =
                 (MainPresenter.PartnerBroadcastSubscriber) spy(mPresenter.getPartnerBroadcastSubscriber());
         Exception exception = new Exception("Test error");
@@ -241,7 +236,7 @@ public class MainPresenterTest {
     }
 
     @Test
-    public void shouldSubscribeOnError() throws Exception {
+    public void shouldPartnerBroadcastSubscriberOnError() throws Exception {
         MainPresenter mainPresenterSpy = spy(mPresenter);
         MainPresenter.PartnerBroadcastSubscriber subscriberSpy =
                 (MainPresenter.PartnerBroadcastSubscriber) spy(mainPresenterSpy.getPartnerBroadcastSubscriber());
@@ -251,6 +246,7 @@ public class MainPresenterTest {
         flowable.subscribe(subscriberSpy);
 
         verify(subscriberSpy, times(1)).onError(exception);
+        verify(mainPresenterSpy, times(1)).onError(any(String.class));
         verify(mainPresenterSpy, times(1)).endBroadcast();
         verify(subscriberSpy, never()).onComplete();
     }

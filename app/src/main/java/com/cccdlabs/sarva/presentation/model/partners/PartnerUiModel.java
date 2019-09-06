@@ -2,6 +2,13 @@ package com.cccdlabs.sarva.presentation.model.partners;
 
 import com.cccdlabs.sarva.presentation.model.base.UiModel;
 
+/**
+ * Object representing a user connecting to this device for pairing and search functions and
+ * specific to the <code>presentation</code> package of this application.
+ *
+ * @author Johnny Spence
+ * @version 1.0.0
+ */
 public class PartnerUiModel extends UiModel {
 
     /**

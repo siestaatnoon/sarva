@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BarMeterWidget">
+        <attr name="numActiveBars" format="integer" />      <!-- number of active bars to show -->
+        <attr name="numTotalBars" format="integer" />       <!-- total number of bars to show -->
+        <attr name="barWidth" format="dimension" />         <!-- width of single meter bar -->
+        <attr name="innerPadding" format="dimension" />     <!-- padding between bars -->
+        <attr name="outerCornerRadius" format="dimension" /><!-- border corner radius of widget -->
+        <attr name="barCornerRadius" format="dimension" />  <!-- corner radius of meter bar -->
+        <attr name="barFillColor" format="color" />         <!-- color of active meter bar -->
+        <attr name="barBaseColor" format="color" />         <!-- color of inactive meter bar -->
+        <attr name="borderColor" format="color" />          <!-- color of widget border -->
+        <attr name="barBorderColor" format="color" />       <!-- color of meter bar border -->
+        <attr name="innerFillColor" format="color" />       <!-- color of inner padding space -->
+    </declare-styleable>
+</resources>

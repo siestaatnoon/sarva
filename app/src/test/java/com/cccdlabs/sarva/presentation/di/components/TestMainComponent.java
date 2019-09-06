@@ -1,5 +1,6 @@
 package com.cccdlabs.sarva.presentation.di.components;
 
+import com.cccdlabs.sarva.domain.interactors.partners.PartnerBroadcastUseCase;
 import com.cccdlabs.sarva.presentation.di.PerActivity;
 import com.cccdlabs.sarva.presentation.di.modules.TestActivityModule;
 import com.cccdlabs.sarva.presentation.di.modules.TestMainModule;
@@ -18,4 +19,6 @@ import dagger.Component;
                 TestMainModule.class
         }
 )
-public interface TestMainComponent extends MainComponent {}
+public interface TestMainComponent extends MainComponent {
+    PartnerBroadcastUseCase partnerBroadcastUseCase();
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_partner_add"
+        android:icon="@drawable/ic_person_add_white_24dp"
+        android:orderInCategory="100"
+        android:title="@string/menu_partner_add"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_partner_check"
+        android:icon="@drawable/ic_group_white_24dp"
+        android:orderInCategory="200"
+        android:title="@string/menu_partner_check"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_partner_search"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:orderInCategory="300"
+        android:title="@string/menu_partner_search"
+        app:showAsAction="never" />
+
+</menu>

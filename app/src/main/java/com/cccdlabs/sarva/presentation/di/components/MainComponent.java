@@ -1,6 +1,5 @@
 package com.cccdlabs.sarva.presentation.di.components;
 
-import com.cccdlabs.sarva.domain.interactors.partners.PartnerBroadcastUseCase;
 import com.cccdlabs.sarva.presentation.di.PerActivity;
 import com.cccdlabs.sarva.presentation.di.modules.ActivityModule;
 import com.cccdlabs.sarva.presentation.di.modules.MainModule;
@@ -16,9 +15,9 @@ public interface MainComponent extends ActivityComponent {
 
     MainPresenter mainPresenter();
 
-    PartnerBroadcastUseCase partnerBroadcastUseCase();
-
     void inject(MainActivity mainActivity);
 
-    void inject(MainPresenter mainPresenter);
+    // NOTE: Dagger tip, just add @Inject to MainPresenter constructor
+    //       an you won't need this
+    // void inject(MainPresenter mainPresenter);
 }

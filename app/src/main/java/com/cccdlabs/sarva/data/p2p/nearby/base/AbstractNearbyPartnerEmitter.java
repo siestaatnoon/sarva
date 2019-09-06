@@ -323,8 +323,10 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      * @param repository    The PartnerRepository for database functions
      */
     public AbstractNearbyPartnerEmitter(@NonNull Activity activity, PartnerRepository repository) {
-        messagesClient = getMessagesClient();
         initialize(null, activity, repository);
+        messagesClient = getMessagesClient();
+        messagesClient.registerStatusCallback(statusCallback);
+        initFlowable();
     }
 
     /**
@@ -335,8 +337,10 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      * @param repository    The PartnerRepository for database functions
      */
     public AbstractNearbyPartnerEmitter(@NonNull Context context, PartnerRepository repository) {
-        messagesClient = getMessagesClient();
         initialize(context, null, repository);
+        messagesClient = getMessagesClient();
+        messagesClient.registerStatusCallback(statusCallback);
+        initFlowable();
     }
 
     /**
@@ -352,9 +356,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
         this.activity = activity;
         this.repository = repository;
         statusCallback = getStatusCallback();
-        messagesClient.registerStatusCallback(statusCallback);
         emitters = new HashMap<>();
-        initFlowable();
     }
 
     /**

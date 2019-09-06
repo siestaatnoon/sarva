@@ -2,20 +2,23 @@ package com.cccdlabs.sarva.presentation.ui.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+
+import androidx.appcompat.widget.Toolbar;
 
 import com.cccdlabs.sarva.R;
 import com.cccdlabs.sarva.presentation.di.HasComponent;
 import com.cccdlabs.sarva.presentation.di.components.AppComponent;
 import com.cccdlabs.sarva.presentation.di.components.DaggerMainComponent;
 import com.cccdlabs.sarva.presentation.di.components.MainComponent;
+import com.cccdlabs.sarva.presentation.di.modules.MainModule;
 import com.cccdlabs.sarva.presentation.di.modules.P2pModule;
 import com.cccdlabs.sarva.presentation.presenters.MainPresenter;
 import com.cccdlabs.sarva.presentation.ui.activities.base.BaseAppCompatActivity;
+import com.cccdlabs.sarva.presentation.ui.widgets.BarMeterWidget;
 import com.cccdlabs.sarva.presentation.views.MainView;
 
 import javax.inject.Inject;
@@ -33,15 +36,25 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         AppComponent appComponent = getAppComponent();
         mMainComponent = DaggerMainComponent.builder()
                 .appComponent(appComponent)
-                .p2pModule(new P2pModule(this, appComponent.partnerRepository()))
                 .activityModule(getActivityModule())
+                .p2pModule(new P2pModule(this, appComponent.partnerRepository()))
+                .mainModule(new MainModule(this))
                 .build();
         mMainComponent.inject(this);
-        mMainComponent.inject(mPresenter);
         mContext = appComponent.context();
+
+        BarMeterWidget meter = findViewById(R.id.bar_meter_widget);
+        System.out.println("barFillColor: " + meter.getBarFillColor());
+        System.out.println("numActiveBars: " + meter.getNumActiveBars());
+        meter.setBarFillColor(Color.BLUE);
+        meter.setNumActiveBars(6);
+
     }
 
     @Override
@@ -57,6 +70,12 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        mPresenter.stop();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         mPresenter.stop();
@@ -66,6 +85,9 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
     protected void onDestroy() {
         super.onDestroy();
         mPresenter.destroy();
+        mPresenter = null;
+        mMainComponent = null;
+        mContext = null;
     }
 
     @Override
@@ -141,11 +163,5 @@ public class MainActivity extends BaseAppCompatActivity implements MainView, Has
     @Override
     public void showError(String message) {
         showMessage(message);
-    }
-
-    protected void showMessage(String message) {
-        if ( ! TextUtils.isEmpty(message)) {
-            Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
-        }
     }
 }

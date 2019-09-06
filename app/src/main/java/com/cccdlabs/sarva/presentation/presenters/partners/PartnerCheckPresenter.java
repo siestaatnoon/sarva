@@ -19,7 +19,6 @@ import com.cccdlabs.sarva.presentation.presenters.base.AbstractPresenter;
 import com.cccdlabs.sarva.presentation.presenters.observers.PresenterCompletableObserver;
 import com.cccdlabs.sarva.presentation.presenters.observers.PresenterDisposableSubscriber;
 import com.cccdlabs.sarva.presentation.presenters.observers.PresenterSingleObserver;
-import com.cccdlabs.sarva.presentation.views.MainView;
 import com.cccdlabs.sarva.presentation.views.partners.PartnerCheckView;
 
 import java.util.ArrayList;
@@ -40,10 +39,10 @@ public class PartnerCheckPresenter extends AbstractPresenter<Partner> {
     @Inject MainThread mMainThread;
     @Inject Context mContext;
 
-    private CompositeDisposable mDisposables;
     private PresenterSingleObserver<List<PartnerUiModel>> mShowPartnersObserver;
     private PresenterDisposableSubscriber<PartnerResult> mPartnerCheckSubscriber;
     private PresenterCompletableObserver mSetPartnerActiveObserver;
+    private CompositeDisposable mDisposables;
     private List<PartnerUiModel> mPartners;
     private boolean hasStartedEmitter;
 
@@ -51,7 +50,7 @@ public class PartnerCheckPresenter extends AbstractPresenter<Partner> {
 
         private PartnerCheckView view;
 
-        private PartnerCheckSubscriber() {
+        PartnerCheckSubscriber() {
             super(mContext, PartnerCheckPresenter.this);
             view = (PartnerCheckView) getView();
         }
@@ -85,7 +84,7 @@ public class PartnerCheckPresenter extends AbstractPresenter<Partner> {
 
         private PartnerCheckView view;
 
-        private ShowPartnersObserver() {
+        ShowPartnersObserver() {
             super(mContext, PartnerCheckPresenter.this);
             view = (PartnerCheckView) getView();
         }
@@ -106,7 +105,7 @@ public class PartnerCheckPresenter extends AbstractPresenter<Partner> {
         private PartnerCheckView view;
         private PartnerUiModel uiModel;
 
-        private SetPartnerActiveObserver(@NonNull PartnerUiModel uiModel) {
+        SetPartnerActiveObserver(@NonNull PartnerUiModel uiModel) {
             super(mContext, PartnerCheckPresenter.this);
             view = (PartnerCheckView) getView();
             this.uiModel = uiModel;
@@ -118,16 +117,20 @@ public class PartnerCheckPresenter extends AbstractPresenter<Partner> {
         }
     }
 
-    public PartnerCheckPresenter(final PartnerRepository repository, final MainView view) {
+    @Inject
+    public PartnerCheckPresenter(final PartnerRepository repository, final PartnerCheckView view) {
         super(repository, view);
         mDisposables = new CompositeDisposable();
+        mPartners = new ArrayList<>();
     }
 
     @SuppressWarnings("all")
     public void retrieveAllPartners() {
         if (mPartners != null) {
             mPartners.clear();
-            mDisposables.remove(mShowPartnersObserver);
+            if (mShowPartnersObserver != null) {
+                mDisposables.remove(mShowPartnersObserver);
+            }
         }
 
         mPartners = new ArrayList<>();
@@ -154,6 +157,32 @@ public class PartnerCheckPresenter extends AbstractPresenter<Partner> {
                 .observeOn(mMainThread.getScheduler())
                 .subscribeWith(mSetPartnerActiveObserver);
         mDisposables.add(mSetPartnerActiveObserver);
+    }
+
+    protected void startEmitter() {
+        if (hasStartedEmitter) {
+            mPartnerCheckUseCase.resumeEmitterSource();
+            return;
+        }
+
+        mPartnerCheckSubscriber = getPartnerCheckSubscriber();
+        mPartnerCheckUseCase.emit(null)
+                .subscribeOn(mExecutorThread.getScheduler())
+                .observeOn(mMainThread.getScheduler())
+                .onBackpressureBuffer(100)
+                .subscribe(mPartnerCheckSubscriber);
+        ((PartnerCheckView)getView()).onEmissionStarted();
+        mDisposables.add(mPartnerCheckSubscriber);
+        hasStartedEmitter = true;
+    }
+
+    protected void stopEmitter() {
+        if (mPartnerCheckSubscriber != null && !mPartnerCheckSubscriber.isDisposed()) {
+            mPartnerCheckSubscriber.onComplete();
+            mDisposables.remove(mPartnerCheckSubscriber); // also calls dispose() on subscriber
+            mPartnerCheckSubscriber = null;
+            ((PartnerCheckView)getView()).onEmissionStopped();
+        }
     }
 
     /**
@@ -208,33 +237,6 @@ public class PartnerCheckPresenter extends AbstractPresenter<Partner> {
     @Override
     public void onError(final String message) {
         getView().showError(message);
-    }
-
-    protected void startEmitter() {
-        if (hasStartedEmitter) {
-            mPartnerCheckUseCase.resumeEmitterSource();
-            return;
-        }
-
-        mPartnerCheckSubscriber = getPartnerCheckSubscriber();
-        mPartnerCheckUseCase.emit(null)
-                .subscribeOn(mExecutorThread.getScheduler())
-                .observeOn(mMainThread.getScheduler())
-                .onBackpressureBuffer(100)
-                .subscribe(mPartnerCheckSubscriber);
-        ((PartnerCheckView)getView()).onEmissionStarted();
-        mDisposables.add(mPartnerCheckSubscriber);
-        hasStartedEmitter = true;
-    }
-
-    protected void stopEmitter() {
-        if (mPartnerCheckSubscriber != null && !mPartnerCheckSubscriber.isDisposed()) {
-            mPartnerCheckSubscriber.onComplete();
-            mDisposables.remove(mPartnerCheckSubscriber);
-            mPartnerCheckSubscriber.dispose();
-            mPartnerCheckSubscriber = null;
-            ((PartnerCheckView)getView()).onEmissionStopped();
-        }
     }
 
     protected PresenterSingleObserver<List<PartnerUiModel>> getShowPartnersObserver() {

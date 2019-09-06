@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--NOTE: This file keeps ALL resources private EXCEPT for those listed here-->
+    <public name="app_name" type="string" />
+    <public name="app_package" type="string" />
+</resources>

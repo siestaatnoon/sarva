@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:config="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/activity_main">
+
+    <RelativeLayout
+        android:id="@+id/rl_cardview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp">
+
+        <include layout="@layout/cardview_partner_check" />
+
+        <RelativeLayout
+            android:id="@+id/rl_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="100dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/text_margin"
+                android:text="@string/large_text" />
+
+        </RelativeLayout>
+
+        <com.cccdlabs.sarva.presentation.ui.widgets.BarMeterWidget
+            android:id="@+id/bar_meter_widget"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            config:numActiveBars="4"
+            config:numTotalBars="10"
+            config:height="40dp"
+            config:barWidth="10dp"
+            config:innerPadding="5dp"
+            config:outerCornerRadius="5dp"
+            config:barCornerRadius="2dp"
+            config:barFillColor="#AA0000"
+            config:barBaseColor="#272727"
+            config:barBorderColor="#666666"
+            config:borderColor="#666666"
+            config:innerFillColor="#222222" />
+
+    </RelativeLayout>
+
+</androidx.core.widget.NestedScrollView>

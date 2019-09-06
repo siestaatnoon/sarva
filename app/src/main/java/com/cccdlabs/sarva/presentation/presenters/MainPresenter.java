@@ -100,7 +100,9 @@ public class MainPresenter extends AbstractPresenter<Partner> {
     }
 
     @Override
-    public void stop() {}
+    public void stop() {
+        mUseCase.pauseEmitterSource();
+    }
 
     @Override
     public void destroy() {
