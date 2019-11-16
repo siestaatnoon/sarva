@@ -7,6 +7,8 @@
         android:icon="@drawable/ic_person_add_white_24dp"
         android:orderInCategory="100"
         android:title="@string/menu_partner_add"
+        android:checkable="false"
+        android:enabled="true"
         app:showAsAction="never" />
 
     <item
@@ -14,6 +16,8 @@
         android:icon="@drawable/ic_group_white_24dp"
         android:orderInCategory="200"
         android:title="@string/menu_partner_check"
+        android:checkable="false"
+        android:enabled="true"
         app:showAsAction="never" />
 
     <item
@@ -21,6 +25,8 @@
         android:icon="@drawable/ic_search_white_24dp"
         android:orderInCategory="300"
         android:title="@string/menu_partner_search"
+        android:checkable="false"
+        android:enabled="true"
         app:showAsAction="never" />
 
 </menu>

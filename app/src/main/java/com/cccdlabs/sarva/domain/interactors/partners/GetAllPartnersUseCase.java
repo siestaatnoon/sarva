@@ -35,13 +35,15 @@ public class GetAllPartnersUseCase extends AbstractUseCase<Void, List<Partner>> 
     }
 
     /**
-     * Returns a {@link List} of all {@link Partner}s saved on this device.
+     * Returns a {@link List} of all {@link Partner}s saved on this device. Sets all Partners
+     * inactive prior to retrieving.
      *
      * @param v     The generic type parameter passed to the UseCase to process
      * @return      The Partner list
      * @throws      Exception if an error occurs in the operation
      */
     public List<Partner> run(Void v) throws Exception {
+        repository.setAllInactive();
         return repository.getAll();
     }
 }

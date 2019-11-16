@@ -7,6 +7,7 @@
     <!-- About -->
     <string name="about_made_by">Made by Johnny Spence</string>
     <string name="about_website">www.cccdlabs.com</string>
+    <string name="about_email">johnny@cccdlabs.com</string>
 
     <!-- Activity Titles-->
     <string name="title_about">About</string>
@@ -32,11 +33,18 @@
     <string name="pref_username_label">Your name in other devices</string>
     <string name="pref_volume_label">Volume of tone in search mode</string>
 
+    <!-- Messages -->
+    <string name="message_added">%1$s has added successfully</string>
+    <string name="message_deleted">%1$s has deleted successfully</string>
+    <string name="message_updated">%1$s has updated successfully</string>
+    <string name="message_action_delete">Delete %1$s?</string>
+
     <!-- Errors -->
     <string name="error_authentication">Username and/or password invalid</string>
     <string name="error_lockout">User temporarily disabled</string>
     <string name="error_nearby_permission">Nearby must be enabled on this device to continue use</string>
     <string name="error_nearby_publishing">This device has stopped transmission to other devices</string>
+    <string name="error_nearby_state">This device has stopped transmission and reception to other devices</string>
     <string name="error_nearby_subscribing">This device has stopped reception of other devices</string>
     <string name="error_network_server">A server error has occurred</string>
     <string name="error_network_timeout">The server connection has timed out</string>
@@ -54,6 +62,22 @@
     <string name="image_add_partner_descr">Add Partner</string>
     <string name="image_delete_partner_descr">Delete Partner</string>
     <string name="image_partner_status_descr">Partner Status</string>
+
+    <!-- Partner states -->
+    <string name="partner_state_found">Transmitting</string>
+    <string name="partner_state_not_found">Out of range</string>
+    <string name="partner_state_not_active">Not active</string>
+
+    <!-- Common Terms -->
+    <string name="close">Close</string>
+    <string name="delete">Delete</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="edit">Edit</string>
+    <string name="error">Error</string>
+    <string name="no">No</string>
+    <string name="ok">OK</string>
+    <string name="save">Save</string>
+    <string name="yes">Yes</string>
 
     <!-- Android Studio generated -->
     <string name="large_text">

@@ -193,6 +193,7 @@ public class NearbyPartnerTransmitter extends AbstractNearbyPartnerEmitter {
     public NearbyPartnerTransmitter(@NonNull Activity activity, @NonNull PartnerRepository repository) {
         super(activity, repository);
         mPartners = new ArrayList<>();
+        enablePublishOnStartEmitter(false);
     }
 
     /**
@@ -201,6 +202,7 @@ public class NearbyPartnerTransmitter extends AbstractNearbyPartnerEmitter {
     public NearbyPartnerTransmitter(@NonNull Context context, @NonNull PartnerRepository repository) {
         super(context, repository);
         mPartners = new ArrayList<>();
+        enablePublishOnStartEmitter(false);
     }
 
     /**

@@ -14,8 +14,10 @@ public class MockPartnerEmitter implements PartnerEmitter {
 
     private List<PartnerResult> mPartnerResults;
     private Throwable mError;
+    private boolean hasStartEmitterExecuted;
     private boolean hasPauseEmitterExecuted;
     private boolean hasResumeEmitterExecuted;
+    private boolean hasResetEmitterExecuted;
 
     public MockPartnerEmitter(@NonNull PartnerResult partnerResult) {
         mPartnerResults = new ArrayList<>();
@@ -31,10 +33,15 @@ public class MockPartnerEmitter implements PartnerEmitter {
     }
 
     @Override
-    public Flowable<PartnerResult> getPartnerEmitter() {
+    public Flowable<PartnerResult> getPartnerFlowable() {
         return mError == null
             ? Flowable.fromIterable(mPartnerResults)
             : Flowable.<PartnerResult>error(mError);
+    }
+
+    @Override
+    public void startEmitter() {
+        hasStartEmitterExecuted = true;
     }
 
     @Override
@@ -43,12 +50,35 @@ public class MockPartnerEmitter implements PartnerEmitter {
     }
 
     @Override
+    public void resetEmitter() {
+        hasResetEmitterExecuted = true;
+    }
+
+    @Override
     public void resumeEmitter() {
         hasResumeEmitterExecuted = true;
     }
 
+    @Override
+    public boolean isPublishing() {
+        return true;
+    }
+
+    @Override
+    public boolean isSubscribing() {
+        return true;
+    }
+
+    public boolean hasStartEmitterExecuted() {
+        return hasStartEmitterExecuted;
+    }
+
     public boolean hasPauseEmitterExecuted() {
         return hasPauseEmitterExecuted;
+    }
+
+    public boolean hasResetEmitterExecuted() {
+        return hasResetEmitterExecuted;
     }
 
     public boolean hasResumeEmitterExecuted() {

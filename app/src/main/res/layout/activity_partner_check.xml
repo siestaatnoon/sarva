@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:keepScreenOn="true"
+    tools:context="com.cccdlabs.sarva.presentation.ui.activities.partners.PartnerCheckActivity">
+
+    <include layout="@layout/include_toolbar" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/partner_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+    <include layout="@layout/include_progressbar" />
+
+    <include layout="@layout/include_bottom_navigation" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,16 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#242424</color>
-    <color name="colorPrimaryDark">#000000</color>
+    <!-- Material Design Base Dark Theme -->
+    <color name="colorPrimary">#BB86FC</color>
+    <color name="colorPrimaryVariant">#3700B3</color>
+    <color name="colorOnPrimary">#000000</color>
+    <color name="colorSecondary">#03DAC6</color>
+    <color name="colorSecondaryVariant">#03DAC6</color>
+    <color name="colorOnSecondary">#000000</color>
+    <color name="colorError">#CF6679</color>
+    <color name="colorOnError">#000000</color>
+    <color name="colorSurface">#121212</color>
+    <color name="colorOnSurface">#FFFFFF</color>
+    <color name="colorBackground">#121212</color>
+    <color name="colorOnBackground">#FFFFFF</color>
+
+    <!-- Custom colors -->
     <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorPrimaryLight">#666666</color>
+    <color name="colorSurfaceVariant">#363636</color>
     <color name="colorGreen">#00c853</color>
     <color name="colorRed">#d32f2f</color>
+    <color name="colorRedFaded">#ccd32f2f</color>
     <color name="colorWhite">#FFFFFF</color>
-    <color name="colorWhiteFaded">#40FFFFFF</color>
+    <color name="colorWhiteAlpha50">#80FFFFFF</color>
+    <color name="colorWhiteAlpha25">#40FFFFFF</color>
+    <color name="colorWhiteAlpha12">#20FFFFFF</color>
+    <color name="colorYellow">#FFEB3B</color>
 
-    <color name="nav_top_background">@color/colorPrimary</color>
-    <color name="nav_bottom_background">@color/colorPrimary</color>
-    <color name="nav_bottom_item_on">#FFFFFFFF</color>
-    <color name="nav_bottom_item_off">#AAFFFFFF</color>
+    <!-- Top/Bottom Navigation -->
+    <color name="nav_top_background">@color/colorSurfaceVariant</color>
+    <color name="nav_bottom_background">@color/colorSurfaceVariant</color>
+    <color name="nav_bottom_item_on">@color/colorWhite</color>
+    <color name="nav_bottom_item_off">@color/colorWhiteAlpha50</color>
+
+    <!-- Snackbar -->
+    <color name="snackbar_bg_color">@color/colorPrimaryLight</color>
+    <color name="snackbar_text_color">@color/colorWhite</color>
+    <color name="snackbar_button_color">@color/colorYellow</color>
+
+    <!-- ProgressBar -->
+    <color name="progressbar_color">@color/colorWhite</color>
+    <color name="progressbar_bg_color">@color/colorWhiteAlpha12</color>
 
 </resources>

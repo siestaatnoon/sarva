@@ -16,6 +16,13 @@ public interface BaseView {
     Context context();
 
     /**
+     * Show an error message
+     *
+     * @param throwable The exception thrown.
+     */
+    void showError(Throwable throwable);
+
+    /**
      * Show a view with a progress bar indicating a loading process.
      */
     void showLoading();
@@ -34,11 +41,4 @@ public interface BaseView {
      * Hide a retry view shown if there was an error when retrieving data.
      */
     void hideRetry();
-
-    /**
-     * Show an error message
-     *
-     * @param message A string representing an error.
-     */
-    void showError(String message);
 }

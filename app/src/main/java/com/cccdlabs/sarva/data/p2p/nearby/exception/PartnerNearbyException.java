@@ -1,17 +1,17 @@
 package com.cccdlabs.sarva.data.p2p.nearby.exception;
 
 /**
- * Root Exception for checked errors in the <code>p2p/nearby</code> package.
+ * Root Exception for runtime errors in the <code>p2p/nearby</code> package.
  *
  * @author Johnny Spence
  * @version 1.0.0
  */
-public class NearbyException extends Exception {
+public class PartnerNearbyException extends RuntimeException {
 
     /**
      * No argument constructor.
      */
-    public NearbyException() {}
+    public PartnerNearbyException() {}
 
     /**
      * Constructor.
@@ -19,7 +19,7 @@ public class NearbyException extends Exception {
      * @param message   The error message
      * @param cause     Throwable object triggering this exception
      */
-    public NearbyException(String message, Throwable cause) {
+    public PartnerNearbyException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -28,7 +28,7 @@ public class NearbyException extends Exception {
      *
      * @param message The error message
      */
-    public NearbyException(String message) {
+    public PartnerNearbyException(String message) {
         super(message);
     }
 
@@ -37,7 +37,7 @@ public class NearbyException extends Exception {
      *
      * @param cause Throwable object triggering this exception
      */
-    public NearbyException(Throwable cause) {
+    public PartnerNearbyException(Throwable cause) {
         super(cause);
     }
 }

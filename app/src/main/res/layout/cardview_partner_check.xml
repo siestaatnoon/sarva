@@ -15,7 +15,6 @@
         android:maxHeight="80dp">
 
         <ImageView
-            style="@style/state_partner_off"
             android:id="@+id/iv_user_image"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -23,7 +22,8 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="5dp"
             android:src="@drawable/ic_account_circle_white_24dp"
-            android:contentDescription="@string/image_partner_descr" />
+            android:contentDescription="@string/image_partner_descr"
+            style="@style/state_partner_off" />
 
         <TextView
             android:id="@+id/tv_username"
@@ -84,7 +84,6 @@
             android:visibility="visible"/>
 
         <ImageView
-            style="@style/state_partner_on"
             android:id="@+id/iv_checked"
             android:layout_width="30dp"
             android:layout_height="30dp"
@@ -92,7 +91,8 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="15dp"
             android:src="@drawable/ic_check_white_24dp"
-            android:contentDescription="@string/image_partner_status_descr"/>
+            android:contentDescription="@string/image_partner_status_descr"
+            style="@style/state_partner_on" />
 
     </RelativeLayout>
 

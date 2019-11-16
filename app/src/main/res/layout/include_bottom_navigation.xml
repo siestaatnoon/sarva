@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.bottomnavigation.BottomNavigationView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_navigation"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:background="@color/nav_bottom_background"
+    app:itemIconTint="@color/bottom_navigation_colors"
+    app:itemTextColor="@color/bottom_navigation_colors"
+    app:layout_behavior="com.cccdlabs.sarva.presentation.ui.behaviors.BottomNavigationBehavior"
+    app:menu="@menu/menu_bottom"
+    style="@style/Widget.Design.BottomNavigationView" />

@@ -1,12 +1,12 @@
 package com.cccdlabs.sarva.data.p2p.nearby.exception;
 
 /**
- * Checked exception for when a a user sets the device to not allow Nearby.
+ * Runtime exception for when a a user sets the device to not allow Nearby.
  *
  * @author Johnny Spence
  * @version 1.0.0
  */
-public class PermissionException extends NearbyException {
+public class PermissionException extends PartnerNearbyException {
 
     /**
      * No argument constructor.

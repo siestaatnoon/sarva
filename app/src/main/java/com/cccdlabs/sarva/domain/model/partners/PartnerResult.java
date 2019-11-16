@@ -8,8 +8,9 @@ import androidx.annotation.NonNull;
  * the following object types passed in the Flowables:
  * <ul>
  * <li>{@link Partner} - A partner object</li>
- * <li>{@link Throwable} - An error occurring during pub/sub but allowing its continuation</li>
+ * <li>{@link Status} - A Pub/Sub status object</li>
  * <li>boolean - True or false indicating if currently P2P publishing</li>
+ * <li>{@link Throwable} - An error occurring during pub/sub but allowing its continuation</li>
  * </ul>
  * Note that exactly one of the above can be set in this class and passed through the Flowable which
  * leaves just the three options: pass a Partner object, true/false if publishing or a Throwable.
@@ -28,6 +29,11 @@ public class PartnerResult {
      * The Partner object if one passed in constructor.
      */
     private final Partner partner;
+
+    /**
+     * The Status object if one passed in constructor.
+     */
+    private final Status status;
 
     /**
      * The Throwable error if one passed in constructor.
@@ -103,6 +109,28 @@ public class PartnerResult {
         }
     }
 
+    public static class Status {
+        public boolean isPublishing;
+        public boolean isSubscribing;
+
+        public Status() {}
+
+        public Status(boolean isPublishing, boolean isSubscribing) {
+            this.isPublishing = isPublishing;
+            this.isSubscribing = isSubscribing;
+        }
+
+        public void reset() {
+            isPublishing = false;
+            isSubscribing = false;
+        }
+
+        @Override
+        public String toString() {
+            return "Status[isPublishing: " + (isPublishing) + ", isSubscribing: " + (isSubscribing) + "]";
+        }
+    }
+
     /**
      * Constructor, invalid, throws IllegalArgumentException.
      */
@@ -121,8 +149,25 @@ public class PartnerResult {
     public PartnerResult(@NonNull Partner partner) {
         uuid = partner.getUuid();
         this.partner = partner;
+        status = null;
         exception = null;
         publishStatus = PublishStatus.INVALID;
+        hasResult = true;
+        hasError = false;
+    }
+
+    /**
+     * Constructor, sets the {@link Status} value. If this constructor is not used,
+     * {@link #getPartner()}, and {@link #getUuid()} will always return null.
+     *
+     * @param status The Status object
+     */
+    public PartnerResult(@NonNull Status status) {
+        this.status = status;
+        publishStatus = status.isPublishing ? PublishStatus.PUBLISHING : PublishStatus.NOT_PUBLISHING;
+        uuid = null;
+        partner = null;
+        exception = null;
         hasResult = true;
         hasError = false;
     }
@@ -138,6 +183,7 @@ public class PartnerResult {
         publishStatus = isPublishing ? PublishStatus.PUBLISHING : PublishStatus.NOT_PUBLISHING;
         uuid = null;
         partner = null;
+        status = null;
         exception = null;
         hasResult = false;
         hasError = false;
@@ -153,6 +199,7 @@ public class PartnerResult {
         this.exception = exception;
         uuid = null;
         partner = null;
+        status = null;
         publishStatus = PublishStatus.INVALID;
         hasResult = false;
         hasError = true;
@@ -174,6 +221,15 @@ public class PartnerResult {
      */
     public Partner getPartner() {
         return partner;
+    }
+
+    /**
+     * Returns the {@link Status}, if set in constructor, otherwise null.
+     *
+     * @return The Status object
+     */
+    public Status getStatus() {
+        return status;
     }
 
     /**
@@ -215,5 +271,20 @@ public class PartnerResult {
      */
     public PublishStatus getPublishStatus() {
         return publishStatus;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(getClass().getSimpleName()).append("[");
+        buffer.append("uuid: ").append(uuid).append(", ");
+        buffer.append("partner: ").append(partner).append(", ");
+        buffer.append("status: ").append(status).append(", ");
+        buffer.append("publishStatus: ").append(publishStatus).append(", ");
+        buffer.append("exception: ").append(exception).append(", ");
+        buffer.append("hasResult: ").append(hasResult).append(", ");
+        buffer.append("hasError: ").append(hasError);
+        buffer.append("]");
+        return buffer.toString();
     }
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.cccdlabs.sarva.R;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.ClientStateException;
 import com.cccdlabs.sarva.data.p2p.nearby.exception.PermissionException;
 import com.cccdlabs.sarva.data.p2p.nearby.exception.PublishExpiredException;
 import com.cccdlabs.sarva.data.p2p.nearby.exception.SubscribeExpiredException;
@@ -44,6 +45,8 @@ public final class ErrorMessageFactory {
             resId = R.string.error_network_connection;
         } else if (throwable instanceof PermissionException) {
             resId = R.string.error_nearby_permission;
+        } else if (throwable instanceof ClientStateException) {
+            resId = R.string.error_nearby_state;
         } else if (throwable instanceof PublishExpiredException) {
             resId = R.string.error_nearby_publishing;
         } else if (throwable instanceof SubscribeExpiredException) {

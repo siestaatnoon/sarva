@@ -1,8 +1,5 @@
 package com.cccdlabs.sarva.presentation.presenters.observers;
 
-import android.content.Context;
-
-import com.cccdlabs.sarva.presentation.exception.ErrorMessageFactory;
 import com.cccdlabs.sarva.presentation.presenters.base.Presenter;
 
 import io.reactivex.observers.DisposableSingleObserver;
@@ -22,18 +19,11 @@ abstract public class PresenterSingleObserver<T> extends DisposableSingleObserve
     private Presenter presenter;
 
     /**
-     * The Android context for generating an error message.
-     */
-    private Context context;
-
-    /**
      * Constructor.
      *
-     * @param context       The Android context
      * @param presenter     The Presenter utilizing this observable
      */
-    public PresenterSingleObserver(Context context, Presenter presenter) {
-        this.context = context;
+    public PresenterSingleObserver(Presenter presenter) {
         this.presenter = presenter;
     }
 
@@ -54,15 +44,6 @@ abstract public class PresenterSingleObserver<T> extends DisposableSingleObserve
     @Override
     public void onError(final Throwable throwable) {
         Timber.e(throwable);
-        presenter.onError(getErrorMessage(throwable));
-    }
-
-    /**
-     * Returns a user-friendly error message.
-     *
-     * @param throwable The error object that occurs in the UseCase call
-     */
-    private String getErrorMessage(final Throwable throwable) {
-        return ErrorMessageFactory.create(context, throwable);
+        presenter.onError(throwable);
     }
 }

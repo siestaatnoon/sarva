@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.oscarrrweb.sarva"
+        applicationId "com.cccdlabs.sarva"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
@@ -75,7 +75,7 @@ def gsonVersion = "2.8.5"
 def junitVersion = "4.12"
 def leakcanaryVersion = "1.6.3"
 def mockitoVersion = "2.8.9"
-def nearbyVersion = "17.0.0"
+def nearbyVersion = "16.0.0"
 def okHttpVersion = "3.12.1"
 def retrofitVersion = "2.5.0"
 def robolectricVersion = "4.1"

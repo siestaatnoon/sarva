@@ -28,6 +28,9 @@ import com.google.android.gms.nearby.messages.StatusCallback;
 import com.google.android.gms.nearby.messages.Strategy;
 import com.google.android.gms.nearby.messages.SubscribeCallback;
 import com.google.android.gms.nearby.messages.SubscribeOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +60,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     /**
      * The Nearby Messages client.
      */
-    protected final MessagesClient messagesClient;
+    protected MessagesClient messagesClient;
 
     /**
      * Container for RxJava emitters that subscribe to Nearby Messages.
@@ -92,7 +95,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     /**
      * Callback for permission change of Nearby use in a user device.
      */
-    protected StatusCallback statusCallback;
+    protected static StatusCallback statusCallback;
 
     /**
      * Listener for Nearby messages received from other devices.
@@ -103,6 +106,18 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      * The Nearby Message that emits from this device to other devices.
      */
     protected Message message;
+
+    /**
+     * Flag if publishing should start on call to {@link #startEmitter()}. Note that this
+     * is true by default.
+     */
+    protected boolean hasPublishOnStart;
+
+    /**
+     * Flag if subscribing should start on call to {@link #startEmitter()}. Note that this
+     * is true by default.
+     */
+    protected boolean hasSubscribeOnStart;
 
     /**
      * Flag if device is currently publishing a message.
@@ -288,7 +303,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     private class PartnerSubscribeCallback extends SubscribeCallback {
         @Override
         public void onExpired() {
-            emitCancelableError(new SubscribeExpiredException("Subscription has expired"));
+            // emitCancelableError(new SubscribeExpiredException("Subscription has expired"));
         }
     }
 
@@ -298,7 +313,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     private class PartnerPublishCallback extends PublishCallback {
         @Override
         public void onExpired() {
-            emitCancelableError(new PublishExpiredException("Publishing has expired"));
+            // emitCancelableError(new PublishExpiredException("Publishing has expired"));
         }
     }
 
@@ -324,9 +339,6 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      */
     public AbstractNearbyPartnerEmitter(@NonNull Activity activity, PartnerRepository repository) {
         initialize(null, activity, repository);
-        messagesClient = getMessagesClient();
-        messagesClient.registerStatusCallback(statusCallback);
-        initFlowable();
     }
 
     /**
@@ -338,9 +350,6 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      */
     public AbstractNearbyPartnerEmitter(@NonNull Context context, PartnerRepository repository) {
         initialize(context, null, repository);
-        messagesClient = getMessagesClient();
-        messagesClient.registerStatusCallback(statusCallback);
-        initFlowable();
     }
 
     /**
@@ -355,8 +364,12 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
         this.context = context;
         this.activity = activity;
         this.repository = repository;
-        statusCallback = getStatusCallback();
+        //statusCallback = getStatusCallback();
+        //messagesClient = getMessagesClient();
+        //messagesClient.registerStatusCallback(statusCallback);
         emitters = new HashMap<>();
+        hasPublishOnStart = true;
+        hasSubscribeOnStart = true;
     }
 
     /**
@@ -378,6 +391,24 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     abstract protected PartnerMessage.Mode getPublishMode();
 
     /**
+     * Sets whether publishing should start on call to {@link #startEmitter()}
+     *
+     * @param hasPublishOnStart True if publishing should start on call to <code>startEmitter()</code>
+     */
+    public void enablePublishOnStartEmitter(boolean hasPublishOnStart) {
+        this.hasPublishOnStart = hasPublishOnStart;
+    }
+
+    /**
+     * Sets whether subscribing should start on call to {@link #startEmitter()}
+     *
+     * @param hasSubscribeOnStart True if subscribing should start on call to <code>startEmitter()</code>
+     */
+    public void enableSubscribeOnStartEmitter(boolean hasSubscribeOnStart) {
+        this.hasSubscribeOnStart = hasSubscribeOnStart;
+    }
+
+    /**
      * Returns the RxJava Flowable, or connection the Nearby messages received to other functions
      * within the application.
      *
@@ -385,8 +416,20 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      * @see     <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html" target="_top">Flowable</a>
      */
     @Override
-    public Flowable<PartnerResult> getPartnerEmitter() {
+    public Flowable<PartnerResult> getPartnerFlowable() {
         return flowable;
+    }
+
+    /**
+     * Starts publishing and subscribing (via initializing the RxJava Flowable).
+     */
+    public void startEmitter() {
+        if (hasPublishOnStart && !isPublishing) {
+            publish();
+        }
+        if (hasSubscribeOnStart && flowable == null) {
+            initFlowable();
+        }
     }
 
     /**
@@ -405,17 +448,26 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     }
 
     /**
+     * Resets the Nearby publishing and subscribing to an initial state.
+     */
+    @Override
+    public void resetEmitter() {
+        resetPubSub();
+    }
+
+    /**
      * Resumes Nearby subscribing and/or publishing after call to pauseEmitter(). If
      * already publishing or subscribing, the call is a no op.
      */
     @Override
     public void resumeEmitter() {
         if (isPublishing || isSubscribing) {
-            return;
+            //return;
         }
 
         if (wasPublishing) {
             publish();
+            wasPublishing = false;
         }
 
         if (emitters != null && emitters.size() > 0) {
@@ -434,6 +486,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      *
      * @return True if publishing a Nearby message, false if not
      */
+    @Override
     public boolean isPublishing() {
         return isPublishing;
     }
@@ -443,6 +496,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      *
      * @return True if subscribing to Nearby messages, false if not
      */
+    @Override
     public boolean isSubscribing() {
         return isSubscribing;
     }
@@ -489,9 +543,16 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      * @return The MessagesClient
      */
     protected MessagesClient getMessagesClient() {
-        return context == null
-            ? Nearby.getMessagesClient(activity)
-            : Nearby.getMessagesClient(context);
+        MessagesClient messagesClient = context == null
+                ? Nearby.getMessagesClient(activity)
+                : Nearby.getMessagesClient(context);
+
+        if (statusCallback == null) {
+            statusCallback = new PartnerStatusCallback();
+            messagesClient.registerStatusCallback(statusCallback);
+        }
+
+        return messagesClient;
     }
 
     /**
@@ -536,9 +597,10 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      */
     protected void publish() {
         if (isPublishing) {
+System.out.println("SARVA_TEST: " + getClass().getSimpleName() + ".publish already publishing, exiting");
             return;
         }
-
+System.out.println("SARVA_TEST: " + getClass().getSimpleName() + ".publish");
         PartnerMessage.Mode mode = getPublishMode();
         if (mode == null) {
             mode = PartnerMessage.Mode.DEFAULT;
@@ -547,12 +609,29 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
         message = NearbyUtils.createMessage(c, mode);
 
         PublishCallback callback = getPublishCallback();
+        Strategy strategy = new Strategy.Builder()
+                .setDiscoveryMode(Strategy.DISCOVERY_MODE_DEFAULT)
+                .setDistanceType(Strategy.DISTANCE_TYPE_DEFAULT)
+                .setTtlSeconds(86400) // TTL_SECONDS_INFINITE is not currently supported for publishes.
+                .build();
         PublishOptions options = new PublishOptions.Builder()
-                .setStrategy(STRATEGY)
+                .setStrategy(strategy)
                 .setCallback(callback)
                 .build();
-        
-        messagesClient.publish(message, options);
+        Task<Void> task = getMessagesClient().publish(message, options);
+        final String className = getClass().getSimpleName();
+        task.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                System.out.println("SARVA_TEST: " + className + ".publish onFailure[" + e + "]");
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                System.out.println("SARVA_TEST: " + className + ".publish onSuccess");
+            }
+        });
+
         isPublishing = true;
     }
 
@@ -565,9 +644,10 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
      */
     protected void subscribe(FlowableEmitter<PartnerResult> emitter) {
         if (isSubscribing) {
+System.out.println("SARVA_TEST: " + getClass().getSimpleName() + ".subscribe already subscribing, exiting");
             return;
         }
-
+System.out.println("SARVA_TEST: " + getClass().getSimpleName() + ".subscribe");
         registerEmitter(emitter);
         messageListener = getMessageListener(emitter);
         if (messageListener == null) {
@@ -577,36 +657,29 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
         }
 
         SubscribeCallback callback = getSubscribeCallback();
+        Strategy strategy = new Strategy.Builder()
+                .setDiscoveryMode(Strategy.DISCOVERY_MODE_DEFAULT)
+                .setDistanceType(Strategy.DISTANCE_TYPE_DEFAULT)
+                .setTtlSeconds(Strategy.TTL_SECONDS_INFINITE)
+                .build();
         SubscribeOptions options = new SubscribeOptions.Builder()
-                .setStrategy(STRATEGY)
+                .setStrategy(strategy)
                 .setCallback(callback)
                 .build();
-        messagesClient.subscribe(messageListener, options);
+        Task<Void> task = getMessagesClient().subscribe(messageListener, options);
+        final String className = getClass().getSimpleName();
+        task.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+System.out.println("SARVA_TEST: " + className + ".subscribe onFailure[" + e + "]");
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+System.out.println("SARVA_TEST: " + className + ".subscribe onSuccess");
+            }
+        });
         isSubscribing = true;
-    }
-
-    /**
-     * Stops Nearby Messages publishing.
-     */
-    protected void unpublish() {
-        if (message == null || ! isPublishing) {
-            return;
-        }
-        messagesClient.unpublish(message);
-        message = null;
-        isPublishing = false;
-    }
-
-    /**
-     * Stops Nearby Messages subscribing.
-     */
-    protected void unsubscribe() {
-        if (messageListener == null || ! isSubscribing) {
-            return;
-        }
-        messagesClient.unsubscribe(messageListener);
-        messageListener = null;
-        isSubscribing = false;
     }
 
     /**
@@ -639,7 +712,7 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
             Exceptions.propagate(throwable);
             return;
         }
-
+System.out.println("SARVA_TEST: " + getClass().getSimpleName() + ".emitCancelableError [" + throwable + "]");
         Set<Integer> keys = emitters.keySet();
         for (Integer key : keys) {
             FlowableEmitter<PartnerResult> emitter = emitters.get(key);
@@ -650,22 +723,92 @@ abstract public class AbstractNearbyPartnerEmitter implements PartnerEmitter {
     }
 
     /**
+     * Stops Nearby Messages publishing.
+     */
+    protected void unpublish() {
+        if (message == null || ! isPublishing) {
+            return;
+        }
+
+System.out.println("SARVA_TEST: " + getClass().getSimpleName() + ".unpublish");
+        Task<Void> task = getMessagesClient().unpublish(message);
+        final String className = getClass().getSimpleName();
+        task.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                System.out.println("SARVA_TEST: " + className + ".unpublish onFailure[" + e + "]");
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                System.out.println("SARVA_TEST: " + className + ".unpublish onSuccess");
+            }
+        });
+
+        message = null;
+        isPublishing = false;
+    }
+
+    /**
+     * Stops Nearby Messages subscribing.
+     */
+    protected void unsubscribe() {
+        if (messageListener == null || ! isSubscribing) {
+            return;
+        }
+
+System.out.println("SARVA_TEST: " + getClass().getSimpleName() + ".unsubscribe");
+        Task<Void> task = getMessagesClient().unsubscribe(messageListener);
+        final String className = getClass().getSimpleName();
+        task.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                System.out.println("SARVA_TEST: " + className + ".unsubscribe onFailure[" + e + "]");
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                System.out.println("SARVA_TEST: " + className + ".unsubscribe onSuccess");
+            }
+        });
+
+        messageListener = null;
+        isSubscribing = false;
+    }
+
+    /**
+     * Closes the Nearby Messages publishing and subscribing and resets the messages client to
+     * the initial state.
+     */
+    protected void resetPubSub() {
+System.out.println("SARVA_TEST: " + getClass().getSimpleName() + ".resetPubSub");
+        unpublish();
+        unsubscribe();
+        if (emitters != null) {
+            Set<Integer> keys = emitters.keySet();
+            for (Integer key : keys) {
+                FlowableEmitter<PartnerResult> emitter = emitters.get(key);
+                emitter = null;
+            }
+            emitters.clear();
+        }
+
+        if (statusCallback != null) {
+            getMessagesClient().unregisterStatusCallback(statusCallback);
+            statusCallback = null;
+        }
+        flowable = null;
+    }
+
+    /**
      * Closes the Nearby Messages publishing and subscribing and tidies up for GC.
      */
     protected void cleanUp() {
-        unpublish();
-        unsubscribe();
-
-        if (emitters != null) {
-            emitters.clear();
-            emitters = null;
-        }
-
-        messagesClient.unregisterStatusCallback(statusCallback);
-        statusCallback = null;
+System.out.println("SARVA_TEST: " + getClass().getSimpleName() + ".cleanUp");
+        resetPubSub();
+        emitters = null;
         context = null;
         activity = null;
         repository = null;
-        flowable = null;
     }
 }

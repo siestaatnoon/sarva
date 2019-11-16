@@ -35,7 +35,7 @@ public class SetPartnerActiveUseCase extends AbstractUseCase<Partner, Void> {
     }
 
     /**
-     * Returns a {@link List} of all {@link Partner}s saved on this device.
+     * Sets the {@link Partner} active or inactive.
      *
      * @param partner   The Partner object where <code>Partner.isActive()</code> must contain
      *                  the active/inactive value to save

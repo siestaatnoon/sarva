@@ -1,12 +1,12 @@
 package com.cccdlabs.sarva.data.p2p.nearby.exception;
 
 /**
- * Checked exception for when a Nearby Messages object suddenly stops publishing.
+ * Runtime exception for when a Nearby Messages object suddenly stops publishing.
  *
  * @author Johnny Spence
  * @version 1.0.0
  */
-public class PublishExpiredException extends NearbyException {
+public class PublishExpiredException extends PartnerNearbyException {
 
     /**
      * No argument constructor.

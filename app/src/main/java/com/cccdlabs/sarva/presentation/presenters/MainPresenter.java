@@ -24,14 +24,14 @@ public class MainPresenter extends AbstractPresenter<Partner> {
     @Inject Context mContext;
 
     private PresenterDisposableSubscriber<PartnerResult> mSubscriber;
-    private boolean hasStartedPublishing;
+    private boolean isPublishing;
 
     class PartnerBroadcastSubscriber extends PresenterDisposableSubscriber<PartnerResult> {
 
         private MainView mainView;
 
         PartnerBroadcastSubscriber() {
-            super(mContext, MainPresenter.this);
+            super(MainPresenter.this);
             mainView = (MainView) getView();
         }
 
@@ -48,7 +48,7 @@ public class MainPresenter extends AbstractPresenter<Partner> {
         @Override
         public void onError(Throwable t) {
             super.onError(t);
-            endBroadcast();
+            destroy();
         }
 
         @Override
@@ -63,60 +63,58 @@ public class MainPresenter extends AbstractPresenter<Partner> {
         super(repository, view);
     }
 
-    public void startBroadcast() {
-        if (hasStartedPublishing) {
+    @Override
+    public void resume() {
+        startEmitter();
+    }
+
+    @Override
+    public void pause() {}
+
+    @Override
+    public void stop() {
+        stopEmitter();
+        isPublishing = false;
+    }
+
+    @Override
+    public void destroy() {
+        stopEmitter();
+        isPublishing = false;
+
+        mUseCase = null;
+        mExecutorThread = null;
+        mMainThread = null;
+        mContext = null;
+    }
+
+    @Override
+    public void onError(final Throwable throwable) {
+        getView().showError(throwable);
+    }
+
+    protected void startEmitter() {
+        if (isPublishing) {
             return;
         }
 
-        mSubscriber = getPartnerBroadcastSubscriber();
+        if (mSubscriber == null) {
+            mSubscriber = getPartnerBroadcastSubscriber();
+        }
         mUseCase.emit(null)
                 .subscribeOn(mExecutorThread.getScheduler())
                 .observeOn(mMainThread.getScheduler())
                 .onBackpressureBuffer(100)
                 .subscribe(mSubscriber);
-        hasStartedPublishing = true;
+        isPublishing = true;
     }
 
-    public void endBroadcast() {
+    protected void stopEmitter() {
         if (mSubscriber != null && ! mSubscriber.isDisposed()) {
             mSubscriber.onComplete();
             mSubscriber.dispose();
             mSubscriber = null;
         }
-    }
-
-    @Override
-    public void resume() {
-        if (hasStartedPublishing) {
-            mUseCase.resumeEmitterSource();
-        } else {
-            startBroadcast();
-        }
-    }
-
-    @Override
-    public void pause() {
-        mUseCase.pauseEmitterSource();
-    }
-
-    @Override
-    public void stop() {
-        mUseCase.pauseEmitterSource();
-    }
-
-    @Override
-    public void destroy() {
-        endBroadcast();
-        mUseCase = null;
-        mExecutorThread = null;
-        mMainThread = null;
-        mContext = null;
-
-    }
-
-    @Override
-    public void onError(final String message) {
-        getView().showError(message);
     }
 
     protected PresenterDisposableSubscriber<PartnerResult> getPartnerBroadcastSubscriber() {

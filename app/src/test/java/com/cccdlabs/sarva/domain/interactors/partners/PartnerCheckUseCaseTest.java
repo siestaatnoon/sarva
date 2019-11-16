@@ -1,6 +1,6 @@
 package com.cccdlabs.sarva.domain.interactors.partners;
 
-import com.cccdlabs.sarva.data.p2p.nearby.NearbyPartnerCheck;
+import com.cccdlabs.sarva.data.p2p.nearby.PartnerCheckEmitter;
 import com.cccdlabs.sarva.domain.interactors.base.MockPartnerEmitter;
 import com.cccdlabs.sarva.domain.model.partners.Partner;
 import com.cccdlabs.sarva.domain.model.partners.PartnerResult;
@@ -16,18 +16,16 @@ import java.util.List;
 import io.reactivex.subscribers.TestSubscriber;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PartnerCheckUseCaseTest {
 
-    private NearbyPartnerCheck mNearbyMock;
+    private PartnerCheckEmitter mEmitterMock;
 
     @Before
     public void setUp() throws Exception {
-        mNearbyMock = mock(NearbyPartnerCheck.class);
+        mEmitterMock = mock(PartnerCheckEmitter.class);
     }
 
     @Test
@@ -40,8 +38,8 @@ public class PartnerCheckUseCaseTest {
         partner.setUuid("61c83f23-13cf-40b4-80c8-3cc5a334f020");
         partnerResults.add(new PartnerResult(partner));
         MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
-        when(mNearbyMock.getPartnerEmitter()).thenReturn(emitter.getPartnerEmitter());
-        PartnerCheckUseCase useCase = new PartnerCheckUseCase(mNearbyMock);
+        when(mEmitterMock.getPartnerFlowable()).thenReturn(emitter.getPartnerFlowable());
+        PartnerCheckUseCase useCase = new PartnerCheckUseCase(mEmitterMock);
 
         TestSubscriber<PartnerResult> subscriber = useCase.emit(null).test();
         subscriber.assertNoErrors();
@@ -53,8 +51,8 @@ public class PartnerCheckUseCaseTest {
     public void shouldEmitIsPublising() throws Exception {
         PartnerResult result = new PartnerResult(true);
         MockPartnerEmitter emitter = new MockPartnerEmitter(result);
-        when(mNearbyMock.getPartnerEmitter()).thenReturn(emitter.getPartnerEmitter());
-        PartnerCheckUseCase useCase = new PartnerCheckUseCase(mNearbyMock);
+        when(mEmitterMock.getPartnerFlowable()).thenReturn(emitter.getPartnerFlowable());
+        PartnerCheckUseCase useCase = new PartnerCheckUseCase(mEmitterMock);
 
         TestSubscriber<PartnerResult> subscriber = useCase.emit(null).test();
         subscriber.assertNoErrors();
@@ -66,8 +64,8 @@ public class PartnerCheckUseCaseTest {
     public void shouldEmitException() throws Exception {
         PartnerResult result = new PartnerResult(new Exception("Test error"));
         MockPartnerEmitter emitter = new MockPartnerEmitter(result);
-        when(mNearbyMock.getPartnerEmitter()).thenReturn(emitter.getPartnerEmitter());
-        PartnerCheckUseCase useCase = new PartnerCheckUseCase(mNearbyMock);
+        when(mEmitterMock.getPartnerFlowable()).thenReturn(emitter.getPartnerFlowable());
+        PartnerCheckUseCase useCase = new PartnerCheckUseCase(mEmitterMock);
 
         TestSubscriber<PartnerResult> subscriber = useCase.emit(null).test();
         subscriber.assertNoErrors();
@@ -76,21 +74,10 @@ public class PartnerCheckUseCaseTest {
     }
 
     @Test
-    public void shouldPauseAndResume() throws Exception {
-        PartnerCheckUseCase useCase = new PartnerCheckUseCase(mNearbyMock);
-
-        useCase.pauseEmitterSource();
-        verify(mNearbyMock, times(1)).pauseEmitter();
-
-        useCase.resumeEmitterSource();
-        verify(mNearbyMock, times(1)).resumeEmitter();
-    }
-
-    @Test
     public void shouldHandleException() throws Exception {
         MockPartnerEmitter emitter = new MockPartnerEmitter(new Exception("Test error"));
-        when(mNearbyMock.getPartnerEmitter()).thenReturn(emitter.getPartnerEmitter());
-        PartnerCheckUseCase useCase = new PartnerCheckUseCase(mNearbyMock);
+        when(mEmitterMock.getPartnerFlowable()).thenReturn(emitter.getPartnerFlowable());
+        PartnerCheckUseCase useCase = new PartnerCheckUseCase(mEmitterMock);
 
         TestSubscriber<PartnerResult> subscriber = useCase.emit(null).test();
         subscriber.assertError(Exception.class);

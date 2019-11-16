@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
@@ -43,8 +44,14 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_dialog_email" />
+        android:layout_gravity="top"
+        android:src="@android:drawable/ic_dialog_email"
+        app:fabSize="normal"
+        app:layout_anchor="@id/bottom_navigation"
+        app:layout_anchorGravity="top|end"
+        app:useCompatPadding="true"
+        app:layout_behavior="com.cccdlabs.sarva.presentation.ui.behaviors.BottomNavigationFabBehavior"/>
+
+    <include layout="@layout/include_bottom_navigation" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

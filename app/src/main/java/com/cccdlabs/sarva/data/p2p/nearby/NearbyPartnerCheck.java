@@ -44,7 +44,7 @@ public class NearbyPartnerCheck extends AbstractNearbyPartnerEmitter {
          *                in the app
          */
         PartnerCheckMessageListener(FlowableEmitter<PartnerResult> emitter) {
-            super(emitter, PartnerMessage.Mode.CHECK, true);
+            super(emitter, PartnerMessage.Mode.CHECK, false);
         }
 
         /**
@@ -97,14 +97,7 @@ public class NearbyPartnerCheck extends AbstractNearbyPartnerEmitter {
             }
 
             Partner model = NearbyUtils.toPartnerModel(message);
-            try {
-                model.setEmitting(false);
-                repository.setInactive(model.getUuid());
-            } catch (RepositoryException e) {
-                continueWithError(e);
-                return;
-            }
-
+            model.setEmitting(false);
             emitter.onNext(new PartnerResult(model));
         }
     }
@@ -120,7 +113,6 @@ public class NearbyPartnerCheck extends AbstractNearbyPartnerEmitter {
      */
     public NearbyPartnerCheck(@NonNull Activity activity, @NonNull PartnerRepository repository) {
         super(activity, repository);
-        publish();
     }
 
     /**
@@ -134,7 +126,6 @@ public class NearbyPartnerCheck extends AbstractNearbyPartnerEmitter {
      */
     public NearbyPartnerCheck(@NonNull Context context, @NonNull PartnerRepository repository) {
         super(context, repository);
-        publish();
     }
 
     /**

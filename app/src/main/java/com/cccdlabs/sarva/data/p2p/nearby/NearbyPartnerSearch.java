@@ -167,7 +167,6 @@ public class NearbyPartnerSearch extends AbstractNearbyPartnerEmitter {
      */
     public NearbyPartnerSearch(@NonNull Activity activity, @NonNull PartnerRepository repository) {
         super(activity, repository);
-        publish();
     }
 
     /**
@@ -181,7 +180,6 @@ public class NearbyPartnerSearch extends AbstractNearbyPartnerEmitter {
      */
     public NearbyPartnerSearch(@NonNull Context context, @NonNull PartnerRepository repository) {
         super(context, repository);
-        publish();
     }
 
     /**

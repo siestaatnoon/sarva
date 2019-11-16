@@ -1,5 +1,7 @@
 package com.cccdlabs.sarva.presentation.di.components;
 
+import com.cccdlabs.sarva.domain.interactors.partners.AddPartnerUseCase;
+import com.cccdlabs.sarva.domain.interactors.partners.DeletePartnerUseCase;
 import com.cccdlabs.sarva.domain.interactors.partners.GetAllPartnersUseCase;
 import com.cccdlabs.sarva.domain.interactors.partners.PartnerCheckUseCase;
 import com.cccdlabs.sarva.domain.interactors.partners.SetPartnerActiveUseCase;
@@ -24,6 +26,10 @@ import dagger.Component;
 public interface TestPartnerComponent extends PartnerComponent {
 
     PartnerCheckUseCase partnerCheckUseCase();
+
+    AddPartnerUseCase addPartnerUseCase();
+
+    DeletePartnerUseCase deletePartnerUseCase();
 
     GetAllPartnersUseCase getAllPartnersUseCase();
 

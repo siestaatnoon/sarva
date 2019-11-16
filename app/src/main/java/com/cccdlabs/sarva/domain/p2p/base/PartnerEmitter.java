@@ -19,13 +19,37 @@ public interface PartnerEmitter {
      *
      * @return The RxJava Flowable
      */
-    Flowable<PartnerResult> getPartnerEmitter();
+    Flowable<PartnerResult> getPartnerFlowable();
+
+    /**
+     * Returns true if messages client is publishing, false if not.
+     *
+     * @return True if messages client is publishing, false if not
+     */
+    boolean isPublishing();
+
+    /**
+     * Returns true if p2p client is subscribing, false if not.
+     *
+     * @return True if p2p client is subscribing, false if not
+     */
+    boolean isSubscribing();
+
+    /**
+     * Starts the p2p connection.
+     */
+    void startEmitter();
 
     /**
      * Pauses the p2p connection temporarily releasing resources
      * (e.g. in the event of an onPause() somewhere).
      */
     void pauseEmitter();
+
+    /**
+     * Resets the p2p connection to an initial state.
+     */
+    void resetEmitter();
 
     /**
      * Resumes the p2p connection (e.g. in the event of an onResume() somewhere).

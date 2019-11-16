@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.cccdlabs.sarva.data.p2p.nearby.base.AbstractNearbyPartnerEmitter;
+import com.cccdlabs.sarva.data.p2p.nearby.exception.PublishExpiredException;
 import com.cccdlabs.sarva.domain.p2p.exception.PartnerException;
 import com.cccdlabs.sarva.domain.repository.exception.RepositoryException;
 import com.google.android.gms.common.api.Api;
@@ -55,12 +56,14 @@ public class MockMessagesClient extends MessagesClient {
     private MockTask mStatusTask;
     private MockTask mPublishTask;
     private MockTask mSubscribeTask;
-    private Throwable mockException;
-    private int mockExceptionIndex;
     private boolean isPublishing;
     private boolean isSubscribing;
+    private boolean hasPublishError;
+    private boolean hasSubscribeError;
+    private boolean hasUnpublishError;
+    private boolean hasUnsubscribeError;
     private boolean isClosed;
-    private boolean debug;
+    private static boolean debug;
 
     private enum ListenerCallbackMethod {
         ON_FOUND,
@@ -126,9 +129,10 @@ public class MockMessagesClient extends MessagesClient {
      */
     public static class MockTask extends Task<Void> {
 
-        private Map<Integer, OnSuccessListener<? super Void>> onSuccessListeners;
-        private Map<Integer, OnCompleteListener<Void>> onCompleteListeners;
-        private Map<Integer, OnCanceledListener> onCanceledListeners;
+        private OnSuccessListener<? super Void> onSuccessListener;
+        private OnCompleteListener<Void> onCompleteListener;
+        private OnCanceledListener onCanceledListener;
+        private OnFailureListener onFailureListener;
         private Exception thrownException;
         private boolean isComplete;
         private boolean isSuccessful;
@@ -136,9 +140,6 @@ public class MockMessagesClient extends MessagesClient {
 
         public MockTask() {
             super();
-            onSuccessListeners = new HashMap<>();
-            onCompleteListeners = new HashMap<>();
-            onCanceledListeners = new HashMap<>();
         }
 
         @Override
@@ -180,31 +181,117 @@ public class MockMessagesClient extends MessagesClient {
         @NonNull
         @Override
         public Task<Void> addOnSuccessListener(@NonNull OnSuccessListener<? super Void> onSuccessListener) {
-            int hashCode = onSuccessListener.hashCode();
-            onSuccessListeners.put(hashCode, onSuccessListener);
+            this.onSuccessListener = onSuccessListener;
+            if (MockMessagesClient.debug) {
+                System.out.println(CLASS_TAG + "[MockTask] addOnSuccessListener(OnSuccessListener)");
+            }
+
+            if (isSuccessful) {
+                triggerOnSuccess();
+            }
             return this;
         }
 
         @NonNull
         @Override
         public Task<Void> addOnCompleteListener(@NonNull OnCompleteListener<Void> onCompleteListener) {
-            int hashCode = onCompleteListeners.hashCode();
-            onCompleteListeners.put(hashCode, onCompleteListener);
+            this.onCompleteListener = onCompleteListener;
+            if (MockMessagesClient.debug) {
+                System.out.println(CLASS_TAG + "[MockTask] addOnCompleteListener(OnCompleteListener)");
+            }
+
+            if (isComplete) {
+                triggerOnComplete();
+            }
             return this;
         }
 
         @NonNull
         @Override
         public Task<Void> addOnCanceledListener(@NonNull OnCanceledListener onCanceledListener) {
-            int hashCode = onCanceledListeners.hashCode();
-            onCanceledListeners.put(hashCode, onCanceledListener);
+            this.onCanceledListener = onCanceledListener;
+            if (MockMessagesClient.debug) {
+                System.out.println(CLASS_TAG + "[MockTask] addOnCanceledListener(OnCanceledListener)");
+            }
+
+            if (isCanceled) {
+                triggerOnCanceled();
+            }
             return this;
         }
 
         @NonNull
         @Override
         public Task<Void> addOnFailureListener(@NonNull OnFailureListener onFailureListener) {
+            this.onFailureListener = onFailureListener;
+            if (MockMessagesClient.debug) {
+                System.out.println(CLASS_TAG + "[MockTask] addOnFailureListener(OnFailureListener)");
+            }
+
+            if (!isSuccessful && thrownException != null) {
+                triggerOnFailure();
+            }
             return this;
+        }
+
+        public void setComplete(boolean complete) {
+            isComplete = complete;
+        }
+
+        public void setSuccessful(boolean successful) {
+            isSuccessful = successful;
+        }
+
+        public void setCanceled(boolean canceled) {
+            isCanceled = canceled;
+        }
+
+        public void triggerOnSuccess() {
+            if (onSuccessListener == null) {
+                return;
+            }
+
+            isSuccessful = true;
+            if (MockMessagesClient.debug) {
+                System.out.println(CLASS_TAG + "[MockTask] triggerOnSuccess()");
+            }
+            onSuccessListener.onSuccess(null);
+        }
+
+        public void triggerOnComplete() {
+            if (onCompleteListener == null) {
+                return;
+            }
+
+            isComplete = true;
+            if (MockMessagesClient.debug) {
+                System.out.println(CLASS_TAG + "[MockTask] triggerOnComplete()");
+            }
+            onCompleteListener.onComplete(this);
+        }
+
+        public void triggerOnCanceled() {
+            if (onCanceledListener == null) {
+                return;
+            }
+
+            isCanceled = true;
+            if (MockMessagesClient.debug) {
+                System.out.println(CLASS_TAG + "[MockTask] triggerOnCanceled()");
+            }
+            onCanceledListener.onCanceled();
+        }
+
+        public void triggerOnFailure() {
+            if (onFailureListener == null) {
+                return;
+            }
+
+            if (MockMessagesClient.debug) {
+                System.out.println(CLASS_TAG + "[MockTask] triggerOnFailure()");
+            }
+            Exception exception = thrownException == null ? new Exception("Random Test Exception") : thrownException;
+            onFailureListener.onFailure(exception);
         }
 
         /**
@@ -215,69 +302,13 @@ public class MockMessagesClient extends MessagesClient {
         }
 
         /**
-         * Extra method to mock OnCompleteListener.
-         */
-        void setComplete(boolean complete) {
-            isComplete = complete;
-            if ( ! isComplete) {
-                return;
-            }
-
-            Set<Integer> hashCodes = onCompleteListeners.keySet();
-            for (int hashCode : hashCodes) {
-                OnCompleteListener<Void> callback = onCompleteListeners.get(hashCode);
-                if (callback != null) {
-                    callback.onComplete(this);
-                }
-            }
-        }
-
-        /**
-         * Extra method to mock OnSuccessListener.
-         */
-        void setSuccessful(boolean successful) {
-            isSuccessful = successful;
-            if ( ! isSuccessful) {
-                return;
-            }
-
-            Set<Integer> hashCodes = onSuccessListeners.keySet();
-            for (int hashCode : hashCodes) {
-                OnSuccessListener<? super Void> callback = onSuccessListeners.get(hashCode);
-                if (callback != null) {
-                    callback.onSuccess(null);
-                }
-            }
-        }
-
-        /**
-         * Extra method to mock OnCanceledListener.
-         */
-        void setCanceled(boolean canceled) {
-            isCanceled = canceled;
-            if ( ! isCanceled) {
-                return;
-            }
-
-            Set<Integer> hashCodes = onCanceledListeners.keySet();
-            for (int hashCode : hashCodes) {
-                OnCanceledListener callback = onCanceledListeners.get(hashCode);
-                if (callback != null) {
-                    callback.onCanceled();
-                }
-            }
-        }
-
-        /**
          * Easy GC.
          */
         void clear() {
-            onSuccessListeners.clear();
-            onCompleteListeners.clear();
-            onCanceledListeners.clear();
-            onSuccessListeners = null;
-            onCompleteListeners = null;
-            onCanceledListeners = null;
+            onSuccessListener = null;
+            onCompleteListener = null;
+            onCanceledListener = null;
+            onFailureListener = null;
             thrownException = null;
         }
 
@@ -323,18 +354,21 @@ public class MockMessagesClient extends MessagesClient {
     @SuppressWarnings("unchecked")
     public MockMessagesClient(@NonNull Activity activity, boolean debug) {
         super(activity, mock(Api.class), null, Settings.DEFAULT_SETTINGS);
-        this.debug = debug;
-        mClientState = new ClientState();
-        statusCallbacks  = new HashMap<>();
-        isClosed = false;
+        init(debug);
     }
 
     @SuppressWarnings("unchecked")
     public MockMessagesClient(@NonNull Context context, boolean debug) {
         super(context, mock(Api.class), null, Settings.DEFAULT_SETTINGS);
-        this.debug = debug;
+        init(debug);
+    }
+
+    private void init(boolean debug) {
+        MockMessagesClient.debug = debug;
         mClientState = new ClientState();
         statusCallbacks  = new HashMap<>();
+        mPublishTask = new MockTask();
+        mSubscribeTask = new MockTask();
         isClosed = false;
     }
 
@@ -364,10 +398,11 @@ public class MockMessagesClient extends MessagesClient {
 
         mMessage = message;
         mPublishOptions = publishOptions;
-        isPublishing = true;
-        mPublishTask = new MockTask();
         mClientState.setMessage(mMessage);
         mClientState.setPublishOptions(mPublishOptions);
+        isPublishing = !hasPublishError;
+        mPublishTask.setComplete(true);
+        mPublishTask.setSuccessful(isPublishing);
         return mPublishTask;
     }
 
@@ -395,10 +430,11 @@ public class MockMessagesClient extends MessagesClient {
 
         mMessageListener = messageListener;
         mSubscribeOptions = subscribeOptions;
-        isSubscribing = true;
-        mSubscribeTask = new MockTask();
         mClientState.setMessageListener(mMessageListener);
         mClientState.setSubscribeOptions(mSubscribeOptions);
+        isSubscribing = !hasSubscribeError;
+        mSubscribeTask.setComplete(true);
+        mSubscribeTask.setSuccessful(isSubscribing);
         return mSubscribeTask;
     }
 
@@ -411,15 +447,18 @@ public class MockMessagesClient extends MessagesClient {
         String msg = CLASS_TAG + " unpublish(Message)";
         if ( ! isPublishing) {
             if (debug) {
-                System.out.println(msg + " ignored, already unpublished");
+                System.out.println(msg + " ignored, already not publishing");
             }
-            return null;
+            return mPublishTask;
         } else if (debug) {
             System.out.println(msg);
         }
+
         mMessage = null;
         mPublishOptions = null;
-        setPublishing(false, false, true, true);
+        isPublishing = false;
+        mPublishTask.setComplete(true);
+        mPublishTask.setSuccessful(!hasUnpublishError);
         return mPublishTask;
     }
 
@@ -430,17 +469,19 @@ public class MockMessagesClient extends MessagesClient {
     public Task<Void> unsubscribe(@NonNull MessageListener messageListener) {
         checkState();
         String msg = CLASS_TAG + " unsubscribe(MessageListener)";
-        if ( ! isSubscribing) {
+        if (!isSubscribing) {
             if (debug) {
                 System.out.println(msg + " ignored, already unsubscribed");
             }
-            return null;
+            return mSubscribeTask;
         } else if (debug) {
             System.out.println(msg);
         }
         mMessageListener = null;
         mSubscribeOptions = null;
-        setSubscribing(false, true, false, false);
+        isSubscribing = false;
+        mSubscribeTask.setComplete(true);
+        mSubscribeTask.setSuccessful(!hasUnsubscribeError);
         return mSubscribeTask;
     }
 
@@ -450,7 +491,6 @@ public class MockMessagesClient extends MessagesClient {
         statusCallbacks.put(hashCode, statusCallback);
         if (mStatusTask == null) {
             mStatusTask = new MockTask();
-            mStatusTask.setComplete(true);
         }
         return mStatusTask;
     }
@@ -463,7 +503,6 @@ public class MockMessagesClient extends MessagesClient {
         }
 
         statusCallbacks.remove(hashCode);
-        mStatusTask.setComplete(true);
         return mStatusTask;
     }
 
@@ -614,26 +653,46 @@ public class MockMessagesClient extends MessagesClient {
             }
         }
 
-        mStatusTask.setCanceled( ! hasPermission);
-        mStatusTask.setComplete(hasPermission);
-        mStatusTask.setSuccessful(hasPermission);
+        if (!hasPermission) {
+            isPublishing = false;
+            isSubscribing = false;
+        }
     }
 
     /**
-     * Mocks an exception thrown in any of the mock onFound, onLost, onDistanceChanged and
-     * onBleSignalChanged calls.
-     *
-     * Optional index parameter is index, within the set of messages used in the mock callbacks,
-     * to throw the exception.
+     * Needs to be called before publish() to invoke mock exception.
      */
-    public void mockMessageCallbackException(@NonNull Throwable throwable) {
-        mockMessageCallbackException(throwable, -1);
+    public void mockPublishFailure(@NonNull Exception exception) {
+        checkState();
+        mPublishTask.setException(exception);
+        hasPublishError = true;
     }
 
-    public void mockMessageCallbackException(@NonNull Throwable throwable, int index) {
+    /**
+     * Needs to be called before subscribe() to invoke mock exception.
+     */
+    public void mockSubscribeFailure(@NonNull Exception exception) {
         checkState();
-        mockException = throwable;
-        mockExceptionIndex = index;
+        mSubscribeTask.setException(exception);
+        hasSubscribeError = true;
+    }
+
+    /**
+     * Needs to be called before unpublish() to invoke mock exception.
+     */
+    public void mockUnpublishFailure(@NonNull Exception exception) {
+        checkState();
+        mPublishTask.setException(exception);
+        hasUnpublishError = true;
+    }
+
+    /**
+     * Needs to be called before unsubscribe() to invoke mock exception.
+     */
+    public void mockUnsubscribeFailure(@NonNull Exception exception) {
+        checkState();
+        mSubscribeTask.setException(exception);
+        hasUnsubscribeError = true;
     }
 
     /**
@@ -647,9 +706,9 @@ public class MockMessagesClient extends MessagesClient {
                 if (debug) {
                     System.out.println(CLASS_TAG + " mockPublishExpired()");
                 }
-                setPublishing(false, true, false, false);
+
+                unpublish(mMessage);
                 callback.onExpired();
-                mPublishOptions = null;
             } else if (debug) {
                 System.out.println(CLASS_TAG + " mockPublishExpired() IGNORED, no PublishCallback set in PublishOptions from call to publish()");
             }
@@ -669,9 +728,9 @@ public class MockMessagesClient extends MessagesClient {
                 if (debug) {
                     System.out.println(CLASS_TAG + " mockSubscribeExpired()");
                 }
-                setSubscribing(false, true, false, false);
+
+                unsubscribe(mMessageListener);
                 callback.onExpired();
-                mSubscribeOptions = null;
             } else if (debug) {
                 System.out.println(CLASS_TAG + " mockSubscribeExpired() IGNORED, no SubscribeCallback set in PublishOptions from call to subscribe()");
             }
@@ -697,7 +756,7 @@ public class MockMessagesClient extends MessagesClient {
                 }
                 mMessage = mClientState.getMessage();
                 mPublishOptions = mClientState.getPublishOptions();
-                setPublishing(true, false, false, false);
+                isPublishing = true;
             }
             isResetable = true;
         }
@@ -711,7 +770,7 @@ public class MockMessagesClient extends MessagesClient {
                 }
                 mMessageListener = mClientState.getMessageListener();
                 mSubscribeOptions = mClientState.getSubscribeOptions();
-                setSubscribing(true, false, false, false);
+                isSubscribing = true;
             }
             isResetable = true;
         }
@@ -750,7 +809,6 @@ public class MockMessagesClient extends MessagesClient {
         mMessageListener = null;
         mPublishOptions = null;
         mSubscribeOptions = null;
-        mockException = null;
 
         if (mStatusTask != null) {
             mStatusTask.clear();
@@ -801,15 +859,6 @@ public class MockMessagesClient extends MessagesClient {
         int delayCount = delays == null ? 0 : delays.size();
         boolean hasDelay = delayCount > 0;
         int count = messages.size();
-        if (mockException != null && mMessageListener instanceof AbstractNearbyPartnerEmitter.PartnerMessageListener) {
-            if (mockExceptionIndex < 0 || mockExceptionIndex >= count) {
-                // generate random index to throw exception
-                // NOTE: index can be equal to messages.size() to throw at end of emission
-                mockExceptionIndex = (int) Math.floor(count * Math.random());
-            }
-        } else {
-            mockExceptionIndex = -1;
-        }
 
         for (int i=0; i < count; i++) {
             if (hasDelay && i < delayCount) {
@@ -843,21 +892,6 @@ public class MockMessagesClient extends MessagesClient {
 
             String emitMessage = CLASS_TAG + " " + caller + ": " + message + " emitted";
             String ignoreMessage = CLASS_TAG + " " + caller + ": " + message + " IGNORED, message client not subscribing";
-
-            if (i == mockExceptionIndex) {
-                boolean isPassThroughException = mockException instanceof PartnerException ||
-                        mockException instanceof RepositoryException;
-                String exceptionMessage = CLASS_TAG + " " + caller + ": {" + mockException.toString() + "} ";
-                exceptionMessage += isPassThroughException ? "emitted" : "thrown";
-                System.out.println(exceptionMessage);
-                if (isPassThroughException) {
-                    ((AbstractNearbyPartnerEmitter.PartnerMessageListener)mMessageListener).continueWithError(mockException);
-                } else {
-                    ((AbstractNearbyPartnerEmitter.PartnerMessageListener)mMessageListener).cancelWithError(mockException);
-                }
-                continue;
-            }
-
             switch (method) {
                 case ON_FOUND:
                     if (mMessageListener != null) {
@@ -917,32 +951,6 @@ public class MockMessagesClient extends MessagesClient {
         if (isClosed) {
             throw new IllegalStateException(CLASS_TAG + " close() already called on MockMessagesClient");
         }
-    }
-
-    /**
-     * Sets the publishing state and mocks the Task<Void> callbacks returned from publish().
-     */
-    private void setPublishing(boolean isPublishing, boolean taskCanceled, boolean taskComplete,
-            boolean taskSuccessful) {
-        if (mPublishTask != null) {
-            mPublishTask.setCanceled(taskCanceled);
-            mPublishTask.setComplete(taskComplete);
-            mPublishTask.setSuccessful(taskSuccessful);
-        }
-        this.isPublishing = isPublishing;
-    }
-
-    /**
-     * Sets the subscribing state and mocks the Task<Void> callbacks returned from subscribe().
-     */
-    private void setSubscribing(boolean isSubscribing, boolean taskCanceled, boolean taskComplete,
-            boolean taskSuccessful) {
-        if (mSubscribeTask != null) {
-            mSubscribeTask.setCanceled(taskCanceled);
-            mSubscribeTask.setComplete(taskComplete);
-            mSubscribeTask.setSuccessful(taskSuccessful);
-        }
-        this.isSubscribing = isSubscribing;
     }
 
     @Override

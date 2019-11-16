@@ -37,5 +37,5 @@ public interface Presenter {
      * Method that control the lifecycle of the view. It should be called in the view's
      * (Activity or Fragment) showError(String) method.
      */
-    void onError(String message);
+    void onError(Throwable throwable);
 }

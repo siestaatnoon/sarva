@@ -5,6 +5,8 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.cccdlabs.sarva.domain.interactors.base.MockPartnerEmitter;
+import com.cccdlabs.sarva.domain.interactors.partners.AddPartnerUseCase;
+import com.cccdlabs.sarva.domain.interactors.partners.DeletePartnerUseCase;
 import com.cccdlabs.sarva.domain.interactors.partners.GetAllPartnersUseCase;
 import com.cccdlabs.sarva.domain.interactors.partners.PartnerCheckUseCase;
 import com.cccdlabs.sarva.domain.interactors.partners.SetPartnerActiveUseCase;
@@ -48,7 +50,12 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class PartnerCheckPresenterTest {
 
+    private static final String TEST_UUID_1 = "d4f74431-2f49-4acb-8f81-57c2ed67047a";
+    private static final String TEST_UUID_2 = "cc908cbf-6a49-4646-86a9-12bc61132e5d";
+
     private PartnerCheckPresenter mPresenter;
+    private AddPartnerUseCase mAddPartnerUseCase;
+    private DeletePartnerUseCase mDeletePartnerUseCase;
     private PartnerCheckUseCase mPartnerCheckUseCase;
     private GetAllPartnersUseCase mGetAllPartnersUseCase;
     private SetPartnerActiveUseCase mSetPartnerActiveUseCase;
@@ -71,9 +78,35 @@ public class PartnerCheckPresenterTest {
                 .build();
 
         mPresenter = partnerComponent.partnerCheckPresenter();
+        mAddPartnerUseCase = partnerComponent.addPartnerUseCase();
+        mDeletePartnerUseCase = partnerComponent.deletePartnerUseCase();
         mPartnerCheckUseCase = partnerComponent.partnerCheckUseCase();
         mGetAllPartnersUseCase = partnerComponent.getAllPartnersUseCase();
         mSetPartnerActiveUseCase = partnerComponent.setPartnerActiveUseCase();
+    }
+
+    @Test
+    public void shouldAddPartner() throws Exception {
+        AddPartnerUseCase useCaseSpy = spy(mAddPartnerUseCase);
+        mPresenter.mAddPartnerUseCase = useCaseSpy;
+        Partner model = new Partner();
+        Single<Partner> single = Single.just(model);
+        when(useCaseSpy.execute(model)).thenReturn(single);
+
+        mPresenter.addPartner(new PartnerUiModel());
+        verify(useCaseSpy, times(1)).execute(any(Partner.class));
+    }
+
+    @Test
+    public void shouldDeletePartner() throws Exception {
+        DeletePartnerUseCase useCaseSpy = spy(mDeletePartnerUseCase);
+        mPresenter.mDeletePartnerUseCase = useCaseSpy;
+        Partner model = new Partner();
+        Single<Integer> single = Single.just(1);
+        when(useCaseSpy.execute(model)).thenReturn(single);
+
+        mPresenter.deletePartner(new PartnerUiModel());
+        verify(useCaseSpy, times(1)).execute(any(Partner.class));
     }
 
     @Test
@@ -105,24 +138,10 @@ public class PartnerCheckPresenterTest {
         PartnerCheckUseCase useCaseSpy = spy(mPartnerCheckUseCase);
         List<PartnerResult> partnerResults = new ArrayList<>(0);
         MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
-        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerEmitter());
+        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerFlowable());
 
         presenterSpy.startEmitter();
         verify(useCaseSpy, times(1)).emit(null);
-    }
-
-    @Test
-    public void shouldStartEmitterAfterResume() throws Exception {
-        PartnerCheckUseCase useCaseSpy = spy(mPartnerCheckUseCase);
-        mPresenter.mPartnerCheckUseCase = useCaseSpy;
-        List<PartnerResult> partnerResults = new ArrayList<>(0);
-        MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
-        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerEmitter());
-
-        mPresenter.startEmitter();
-        mPresenter.stopEmitter();
-        mPresenter.startEmitter();
-        verify(useCaseSpy, times(1)).resumeEmitterSource();
     }
 
     @Test
@@ -132,7 +151,7 @@ public class PartnerCheckPresenterTest {
         PartnerCheckPresenter.PartnerCheckSubscriber subscriberSpy = spy(presenterSpy.new PartnerCheckSubscriber());
         List<PartnerResult> partnerResults = new ArrayList<>(0);
         MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
-        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerEmitter());
+        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerFlowable());
         when(presenterSpy.getPartnerCheckSubscriber()).thenReturn(subscriberSpy);
 
         presenterSpy.startEmitter();
@@ -149,19 +168,11 @@ public class PartnerCheckPresenterTest {
     }
 
     @Test
-    public void shouldPause() throws Exception {
-        PartnerCheckUseCase useCaseSpy = spy(mPartnerCheckUseCase);
-        mPresenter.mPartnerCheckUseCase = useCaseSpy;
-        mPresenter.pause();
-        verify(useCaseSpy, times(1)).pauseEmitterSource();
-    }
-
-    @Test
     public void shouldStop() throws Exception {
         PartnerCheckPresenter presenterSpy = spy(mPresenter);
         presenterSpy.stop();
         verify(presenterSpy, times(1)).stop();
-        verifyNoMoreInteractions(presenterSpy);
+        verify(presenterSpy, times(1)).stopEmitter();
     }
 
     @Test
@@ -176,7 +187,7 @@ public class PartnerCheckPresenterTest {
     @Test
     public void shouldOnError() throws Exception {
         PartnerCheckPresenter presenterSpy = spy(mPresenter);
-        String error = "Test error";
+        Exception error = new Exception("Test error");
 
         presenterSpy.onError(error);
         verify(presenterSpy, times(1)).onError(error);
@@ -187,15 +198,20 @@ public class PartnerCheckPresenterTest {
     @SuppressWarnings("unchecked")
     public void shouldSubscriberOnNextReturnPartners() throws Exception {
         List<PartnerResult> partnerResults = new ArrayList<>(2);
-        partnerResults.add(new PartnerResult(new Partner()));
-        partnerResults.add(new PartnerResult(new Partner()));
+        Partner partner = new Partner();
+        partner.setUuid(TEST_UUID_1);
+        partnerResults.add(new PartnerResult(partner));
+        partner = new Partner();
+        partner.setUuid(TEST_UUID_2);
+        partnerResults.add(new PartnerResult(partner));
 
         PartnerCheckPresenter.PartnerCheckSubscriber subscriberSpy =
                 (PartnerCheckPresenter.PartnerCheckSubscriber) spy(mPresenter.getPartnerCheckSubscriber());
         MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
-        Flowable<PartnerResult> flowable = emitter.getPartnerEmitter();
-        flowable.subscribe(subscriberSpy);
+        Flowable<PartnerResult> flowable = emitter.getPartnerFlowable();
+        doNothing().when(subscriberSpy).addOrUpdatePartner(any(PartnerUiModel.class));
 
+        flowable.subscribe(subscriberSpy);
         verify(subscriberSpy, times(2)).onNext(any(PartnerResult.class));
         verify(subscriberSpy, times(1)).onComplete();
         verify(mActivityMock, times(2)).showPartners(any(List.class));
@@ -209,7 +225,7 @@ public class PartnerCheckPresenterTest {
         Exception exception = new Exception("Test error");
         PartnerResult result = new PartnerResult(exception);
         MockPartnerEmitter emitter = new MockPartnerEmitter(result);
-        Flowable<PartnerResult> flowable = emitter.getPartnerEmitter();
+        Flowable<PartnerResult> flowable = emitter.getPartnerFlowable();
         flowable.subscribe(subscriberSpy);
 
         verify(subscriberSpy, times(1)).onNext(result);
@@ -224,13 +240,77 @@ public class PartnerCheckPresenterTest {
                 (PartnerCheckPresenter.PartnerCheckSubscriber) spy(presenterSpy.getPartnerCheckSubscriber());
         Exception exception = new Exception("Test error");
         MockPartnerEmitter emitter = new MockPartnerEmitter(exception);
-        Flowable<PartnerResult> flowable = emitter.getPartnerEmitter();
+        Flowable<PartnerResult> flowable = emitter.getPartnerFlowable();
         flowable.subscribe(subscriberSpy);
 
         verify(subscriberSpy, times(1)).onError(exception);
-        verify(presenterSpy, times(1)).onError(any(String.class));
+        verify(presenterSpy, times(1)).onError(any(Exception.class));
         verify(presenterSpy, times(1)).stopEmitter();
         verify(subscriberSpy, never()).onComplete();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldAddPartnerObserverOnSuccessReturnPartnerUiModelAndResetPartners() throws Exception {
+        PartnerCheckPresenter presenterSpy = spy(mPresenter);
+        PartnerCheckPresenter.AddPartnerObserver observerSpy =
+                (PartnerCheckPresenter.AddPartnerObserver) spy(presenterSpy.getAddPartnerObserver());
+        PartnerUiModel uiModel = new PartnerUiModel();
+        uiModel.setUuid(TEST_UUID_1);
+        Single<PartnerUiModel> single = Single.just(uiModel);
+        doNothing().when(presenterSpy).retrieveAllPartners();
+        single.subscribe(observerSpy);
+
+        verify(observerSpy, times(1)).onSuccess(uiModel);
+        verify(mActivityMock, times(1)).onPartnerAdded(uiModel);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldAddPartnerObserverOnError() throws Exception {
+        PartnerCheckPresenter presenterSpy = spy(mPresenter);
+        PartnerCheckPresenter.AddPartnerObserver subscriberSpy =
+                (PartnerCheckPresenter.AddPartnerObserver) spy(presenterSpy.getAddPartnerObserver());
+        Exception exception = new Exception("Test error");
+        Single<PartnerUiModel> single = Single.error(exception);
+        single.subscribe(subscriberSpy);
+
+        verify(subscriberSpy, times(1)).onError(exception);
+        verify(presenterSpy, times(1)).onError(any(Exception.class));
+        verify(subscriberSpy, never()).onSuccess(any(PartnerUiModel.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldDeletePartnerObserverOnSuccessReturnPartnerUiModelAndResetPartners() throws Exception {
+        PartnerCheckPresenter presenterSpy = spy(mPresenter);
+        PartnerUiModel uiModel = new PartnerUiModel();
+        uiModel.setUuid(TEST_UUID_1);
+        PartnerCheckPresenter.DeletePartnerObserver observerSpy =
+                (PartnerCheckPresenter.DeletePartnerObserver) spy(presenterSpy.getDeletePartnerObserver(uiModel));
+        Single<Integer> single = Single.just(1);
+        doNothing().when(presenterSpy).retrieveAllPartners();
+
+        single.subscribe(observerSpy);
+        verify(observerSpy, times(1)).onSuccess(1);
+        verify(mActivityMock, times(1)).onPartnerDeleted(uiModel, true);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldDeletePartnerObserverOnError() throws Exception {
+        PartnerCheckPresenter presenterSpy = spy(mPresenter);
+        PartnerUiModel uiModel = new PartnerUiModel();
+        uiModel.setUuid(TEST_UUID_1);
+        PartnerCheckPresenter.DeletePartnerObserver subscriberSpy =
+                (PartnerCheckPresenter.DeletePartnerObserver) spy(presenterSpy.getDeletePartnerObserver(uiModel));
+        Exception exception = new Exception("Test error");
+        Single<Integer> single = Single.error(exception);
+        single.subscribe(subscriberSpy);
+
+        verify(subscriberSpy, times(1)).onError(exception);
+        verify(presenterSpy, times(1)).onError(any(Exception.class));
+        verify(subscriberSpy, never()).onSuccess(any(Integer.class));
     }
 
     @Test
@@ -262,7 +342,7 @@ public class PartnerCheckPresenterTest {
         single.subscribe(subscriberSpy);
 
         verify(subscriberSpy, times(1)).onError(exception);
-        verify(presenterSpy, times(1)).onError(any(String.class));
+        verify(presenterSpy, times(1)).onError(any(Exception.class));
         verify(subscriberSpy, never()).onSuccess(any(List.class));
     }
 
@@ -275,7 +355,7 @@ public class PartnerCheckPresenterTest {
         completable.subscribe(completableSpy);
 
         verify(completableSpy, times(1)).onComplete();
-        verify(mActivityMock, times(1)).onSetPartnerActive(uiModel);
+        verify(mActivityMock, times(1)).onPartnerSetActive(uiModel);
     }
 
     @Test
@@ -289,7 +369,7 @@ public class PartnerCheckPresenterTest {
         completable.subscribe(completableSpy);
 
         verify(completableSpy, times(1)).onError(exception);
-        verify(presenterSpy, times(1)).onError(any(String.class));
+        verify(presenterSpy, times(1)).onError(any(Exception.class));
         verify(completableSpy, never()).onComplete();
     }
 

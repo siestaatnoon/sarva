@@ -2,8 +2,8 @@ package com.cccdlabs.sarva.domain.interactors.partners;
 
 import androidx.annotation.NonNull;
 
-import com.cccdlabs.sarva.data.p2p.nearby.NearbyPartnerSearch;
-import com.cccdlabs.sarva.domain.interactors.partners.base.AbstractPartnerUseCase;
+import com.cccdlabs.sarva.data.p2p.nearby.PartnerSearchEmitter;
+import com.cccdlabs.sarva.domain.interactors.partners.base.PartnerUseCase;
 
 import javax.inject.Inject;
 
@@ -14,13 +14,13 @@ import javax.inject.Inject;
  * @author Johnny Spence
  * @version 1.0.0
  */
-public class PartnerSearchUseCase extends AbstractPartnerUseCase {
+public class PartnerSearchUseCase extends PartnerUseCase {
 
     /**
      * {@inheritDoc}
      */
     @Inject
-    public PartnerSearchUseCase(@NonNull NearbyPartnerSearch emitter) {
+    public PartnerSearchUseCase(@NonNull PartnerSearchEmitter emitter) {
         super(emitter);
     }
 }

@@ -74,9 +74,9 @@ public class MainPresenterTest {
         // borrowed here from UseCase tests, serves well!
         MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
 
-        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerEmitter());
+        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerFlowable());
 
-        mainPresenterSpy.startBroadcast();
+        mainPresenterSpy.startEmitter();
 
         // TODO: figure out why this verifies but useCaseSpy.pauseEmitterSource() does not
         // It's known that useCaseSpy is a different object than what's contained in MainPresenter
@@ -94,11 +94,11 @@ public class MainPresenterTest {
         // borrowed here from UseCase tests, serves well!
         MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
 
-        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerEmitter());
+        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerFlowable());
         when(mainPresenterSpy.getPartnerBroadcastSubscriber()).thenReturn(subscriberSpy);
 
-        mainPresenterSpy.startBroadcast();
-        mainPresenterSpy.endBroadcast();
+        mainPresenterSpy.startEmitter();
+        mainPresenterSpy.stopEmitter();
         verify(subscriberSpy, times(1)).onComplete();
         verify(subscriberSpy, times(1)).dispose();
     }
@@ -112,50 +112,11 @@ public class MainPresenterTest {
         // borrowed here from UseCase tests, serves well!
         MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
 
-        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerEmitter());
+        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerFlowable());
 
         mainPresenterSpy.resume();
-        verify(mainPresenterSpy, times(1)).startBroadcast();
+        verify(mainPresenterSpy, times(1)).startEmitter();
         verify(useCaseSpy, times(1)).emit(null);
-    }
-
-    @Test
-    public void shouldResumeAfterStartBroadcast() throws Exception {
-        MainPresenter mainPresenterSpy = spy(mPresenter);
-        PartnerBroadcastUseCase useCaseSpy = spy(mPartnerBroadcastUseCase);
-        List<PartnerResult> partnerResults = new ArrayList<>(0);
-
-        // Only way to verify spy invocations
-        mainPresenterSpy.mUseCase = useCaseSpy;
-
-        // borrowed here from UseCase tests, serves well!
-        MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
-
-        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerEmitter());
-
-        mainPresenterSpy.startBroadcast();
-        mainPresenterSpy.resume();
-        verify(useCaseSpy, times(1)).resumeEmitterSource();
-    }
-
-    @Test
-    public void shouldPause() throws Exception {
-        MainPresenter mainPresenterSpy = spy(mPresenter);
-        PartnerBroadcastUseCase useCaseSpy = spy(mPartnerBroadcastUseCase);
-
-        // Only way to verify spy invocations
-        mainPresenterSpy.mUseCase = useCaseSpy;
-
-        List<PartnerResult> partnerResults = new ArrayList<>(0);
-
-        // borrowed here from UseCase tests, serves well!
-        MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
-
-        when(useCaseSpy.emit(null)).thenReturn(emitter.getPartnerEmitter());
-
-        mainPresenterSpy.startBroadcast();
-        mainPresenterSpy.pause();
-        verify(useCaseSpy, times(1)).pauseEmitterSource();
     }
 
     @Test
@@ -163,7 +124,7 @@ public class MainPresenterTest {
         MainPresenter mainPresenterSpy = spy(mPresenter);
         mainPresenterSpy.stop();
         verify(mainPresenterSpy, times(1)).stop();
-        verifyNoMoreInteractions(mainPresenterSpy);
+        verify(mainPresenterSpy, times(1)).stopEmitter();
     }
 
     @Test
@@ -171,14 +132,14 @@ public class MainPresenterTest {
         MainPresenter mainPresenterSpy = spy(mPresenter);
         mainPresenterSpy.destroy();
         verify(mainPresenterSpy, times(1)).destroy();
-        verify(mainPresenterSpy, times(1)).endBroadcast();
+        verify(mainPresenterSpy, times(1)).stopEmitter();
         verifyNoMoreInteractions(mainPresenterSpy);
     }
 
     @Test
     public void shouldOnError() throws Exception {
         MainPresenter mainPresenterSpy = spy(mPresenter);
-        String error = "Test error";
+        Exception error = new Exception("Test error");
 
         mainPresenterSpy.onError(error);
         verify(mainPresenterSpy, times(1)).onError(error);
@@ -194,7 +155,7 @@ public class MainPresenterTest {
         MainPresenter.PartnerBroadcastSubscriber subscriberSpy =
                 (MainPresenter.PartnerBroadcastSubscriber) spy(mPresenter.getPartnerBroadcastSubscriber());
         MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
-        Flowable<PartnerResult> flowable = emitter.getPartnerEmitter();
+        Flowable<PartnerResult> flowable = emitter.getPartnerFlowable();
         flowable.subscribe(subscriberSpy);
 
         verify(subscriberSpy, times(2)).onNext(any(PartnerResult.class));
@@ -212,7 +173,7 @@ public class MainPresenterTest {
         MainPresenter.PartnerBroadcastSubscriber subscriberSpy =
                 (MainPresenter.PartnerBroadcastSubscriber) spy(mPresenter.getPartnerBroadcastSubscriber());
         MockPartnerEmitter emitter = new MockPartnerEmitter(partnerResults);
-        Flowable<PartnerResult> flowable = emitter.getPartnerEmitter();
+        Flowable<PartnerResult> flowable = emitter.getPartnerFlowable();
         flowable.subscribe(subscriberSpy);
 
         verify(subscriberSpy, times(2)).onNext(any(PartnerResult.class));
@@ -227,7 +188,7 @@ public class MainPresenterTest {
         Exception exception = new Exception("Test error");
         PartnerResult result = new PartnerResult(exception);
         MockPartnerEmitter emitter = new MockPartnerEmitter(result);
-        Flowable<PartnerResult> flowable = emitter.getPartnerEmitter();
+        Flowable<PartnerResult> flowable = emitter.getPartnerFlowable();
         flowable.subscribe(subscriberSpy);
 
         verify(subscriberSpy, times(1)).onNext(result);
@@ -242,12 +203,12 @@ public class MainPresenterTest {
                 (MainPresenter.PartnerBroadcastSubscriber) spy(mainPresenterSpy.getPartnerBroadcastSubscriber());
         Exception exception = new Exception("Test error");
         MockPartnerEmitter emitter = new MockPartnerEmitter(exception);
-        Flowable<PartnerResult> flowable = emitter.getPartnerEmitter();
+        Flowable<PartnerResult> flowable = emitter.getPartnerFlowable();
         flowable.subscribe(subscriberSpy);
 
         verify(subscriberSpy, times(1)).onError(exception);
-        verify(mainPresenterSpy, times(1)).onError(any(String.class));
-        verify(mainPresenterSpy, times(1)).endBroadcast();
+        verify(mainPresenterSpy, times(1)).onError(any(Exception.class));
+        verify(mainPresenterSpy, times(1)).stopEmitter();
         verify(subscriberSpy, never()).onComplete();
     }
 

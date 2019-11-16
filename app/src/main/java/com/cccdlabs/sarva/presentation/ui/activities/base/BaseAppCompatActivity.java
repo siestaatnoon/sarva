@@ -2,13 +2,17 @@ package com.cccdlabs.sarva.presentation.ui.activities.base;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.cccdlabs.sarva.App;
+import com.cccdlabs.sarva.R;
 import com.cccdlabs.sarva.presentation.di.components.AppComponent;
 import com.cccdlabs.sarva.presentation.di.modules.ActivityModule;
+import com.cccdlabs.sarva.presentation.ui.utils.SnackbarUtils;
 
 /**
  * Activity abstraction that extends {@link AppCompatActivity} and performs the dependency
@@ -38,9 +42,15 @@ abstract public class BaseAppCompatActivity extends AppCompatActivity {
         return new ActivityModule(this);
     }
 
-    protected void showMessage(String message) {
+    protected void showToast(String message) {
         if ( ! TextUtils.isEmpty(message)) {
             Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    protected void showSnackbar(@NonNull View view, String message) {
+        if ( ! TextUtils.isEmpty(message)) {
+            SnackbarUtils.notice(this, view, message, getResources().getString(R.string.dismiss));
         }
     }
 }

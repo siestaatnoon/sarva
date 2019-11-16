@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Utility class for Nearby class testing.
+ * Utility class for Nearby messages class testing.
  */
 public final class TestUtils {
 
@@ -48,8 +48,16 @@ public final class TestUtils {
 
         @Override
         public void onNext(PartnerResult partnerResult) {
-            String objName = "PartnerResult[" + count + "]";
-            Partner expected = partners.get(count);
+            // first 2 results are publish then subscribe status
+            if (count < 2) {
+                assertNotNull("PartnerResult.Status is null", partnerResult.getStatus());
+                count++;
+                return;
+            }
+
+            int index = count - 2;
+            String objName = "PartnerResult[" + index + "]";
+            Partner expected = partners.get(index);
             Partner result = partnerResult.getPartner();
             TestUtils.assertEqualPartners(objName, expected, result);
             count++;
@@ -57,7 +65,8 @@ public final class TestUtils {
 
         @Override
         public void onComplete() {
-            assertEquals("Emission count not " + expectedCount, expectedCount, count);
+            // NOTE: need to subtract 2 results which are publish/subscribe status
+            assertEquals("Emission count not " + expectedCount, expectedCount, count - 2);
         }
 
         @Override
